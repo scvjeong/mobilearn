@@ -5,12 +5,12 @@
     <string name="action_settings">Settings</string>
     <string name="hello_world">Hello world!</string>
     <string name="date">2013.08.09 PM 02:44</string>
-    <string name="q1">Question. 정용기를 표현하는 단어가 아닌 것은?</string>
-    <string name="a1">1. 천재</string>
-    <string name="a2">2. 다재다능</string>
-    <string name="a3">3. 굼쟁이</string>
-    <string name="a4">4. 자유로운 영혼</string>
-    <string name="a5">5. 병신</string>
+    <string name="q1">tariff</string>
+    <string name="a1">1. 차량들</string>
+    <string name="a2">2. 관세</string>
+    <string name="a3">3. 교통</string>
+    <string name="a4">4. 끔직한</string>
+    <string name="a5">5. 느린</string>
     <string name="a6"></string>
     <string name="unlock">탭하여 잠금해제(5)</string>
 

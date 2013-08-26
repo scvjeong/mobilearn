@@ -3,11 +3,13 @@ package com.example.mobilearn;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 
 public class SimpleServiceActivity extends Activity implements OnClickListener{
+	
 	private Button startServiceButton;
 	private Button stopServiceButton;
 	private Button checkAliveButton;
@@ -16,6 +18,7 @@ public class SimpleServiceActivity extends Activity implements OnClickListener{
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
+        
         startServiceButton = (Button)findViewById(R.id.startService);
         stopServiceButton = (Button)findViewById(R.id.stopService);
         checkAliveButton = (Button)findViewById(R.id.checkAlive);
@@ -29,11 +32,11 @@ public class SimpleServiceActivity extends Activity implements OnClickListener{
 	public void onClick(View v) {
 		switch(v.getId()){
 		case R.id.startService:	
-			startService(new Intent(this, SimpleService.class));
+			startService(new Intent(this, LockScreenService.class));
 			break;
 		
 		case R.id.stopService:
-			stopService(new Intent(this, SimpleService.class));
+			stopService(new Intent(this, LockScreenService.class));
 			break;
 			
 		case R.id.checkAlive:

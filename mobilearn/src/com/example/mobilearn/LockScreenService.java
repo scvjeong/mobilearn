@@ -8,9 +8,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.IBinder;
+import android.util.Log;
+import android.view.KeyEvent;
+import android.view.WindowManager;
 import android.widget.Toast;
 
-public class SimpleService extends Service {
+public class LockScreenService extends Service {
 	private KeyguardManager km = null; 
 	private KeyguardManager.KeyguardLock keylock = null;
 	
@@ -25,6 +28,14 @@ public class SimpleService extends Service {
             	i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             	context.startActivity(i);
             }
+			else if(action.equals(Intent.ACTION_SCREEN_ON)){
+            	Intent i = new Intent(context, MainActivity.class);
+            	i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            }
+			else if(action.equals(Intent.ACTION_BOOT_COMPLETED)){
+            	Intent i = new Intent(context, MainActivity.class);
+            	i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            }
 		}
 	};
 	
@@ -35,6 +46,7 @@ public class SimpleService extends Service {
 	
 	@Override
 	public void onCreate() {
+		Log.d("LockScreenService", "LockScreenService::onCreate");
 		// TODO Auto-generated method stub
 		super.onCreate();
 		
@@ -43,13 +55,12 @@ public class SimpleService extends Service {
         	keylock = km.newKeyguardLock("test");
         	keylock.disableKeyguard();
         }
-        
 	}
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId){
-		Toast.makeText(this, "서비스가 시작되었습니다.", Toast.LENGTH_LONG).show();
-		IntentFilter filter = new IntentFilter("com.androidhuman.action.isAlive");
+		//IntentFilter filter = new IntentFilter("com.androidhuman.action.isAlive");
+		IntentFilter filter = new IntentFilter(intent.ACTION_SCREEN_ON);
 		filter.addAction(Intent.ACTION_SCREEN_OFF);
 		registerReceiver(mReceiver, filter);
 		return Service.START_NOT_STICKY;
@@ -65,6 +76,5 @@ public class SimpleService extends Service {
 			unregisterReceiver(mReceiver);
 		Toast.makeText(this, "서비스 종료", Toast.LENGTH_LONG).show();
 	}
-
 }
 
