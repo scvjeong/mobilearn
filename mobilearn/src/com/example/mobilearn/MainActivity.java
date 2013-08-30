@@ -1,19 +1,13 @@
 package com.example.mobilearn;
 
-import java.util.Date;
-
-import com.example.mobilearn.R;
 import android.os.Bundle;
-import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
-import android.view.WindowManager;
 import android.view.View.OnClickListener;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.app.Activity;
-import android.content.Intent;
 import android.database.Cursor;
 
 public class MainActivity extends Activity implements OnClickListener{

@@ -13,5 +13,13 @@
     <string name="a5">5. 느린</string>
     <string name="a6"></string>
     <string name="unlock">탭하여 잠금해제(5)</string>
+    
+    <string-array name="menu_list">
+        <item>문제 목록</item>
+        <item>학습 목록</item>
+        <item>학습 현황</item>
+        <item>설정</item>
+        <item>마켓</item>
+    </string-array>
 
 </resources>
