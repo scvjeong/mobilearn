@@ -2,6 +2,7 @@
 <resources>
 
     <string name="app_name">mobilearn</string>
+	<string name="title">Jeong</string>
     <string name="action_settings">Settings</string>
     <string name="hello_world">Hello world!</string>
     <string name="date">2013.08.09 PM 02:44</string>
@@ -21,5 +22,5 @@
         <item>설정</item>
         <item>마켓</item>
     </string-array>
-
+    
 </resources>
