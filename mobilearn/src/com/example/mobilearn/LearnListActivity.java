@@ -7,6 +7,7 @@ import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.Intent;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.widget.DrawerLayout;
@@ -91,6 +92,8 @@ public class LearnListActivity extends Activity{
     }
 
     public static class ContentFragment extends Fragment {
+    	
+    	private MainProvider mp;
     	private Switch swc;
     	private ListView list;
         public static final String ARG_PLANET_NUMBER = "planet_number";
@@ -102,7 +105,6 @@ public class LearnListActivity extends Activity{
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                 Bundle savedInstanceState) {
-        	
         	Log.d("LearnListActivity","ContentFragment:onCreateView start" );
             View rootView;
             ArrayList<HashMap<String, String>> questionList = new ArrayList<HashMap<String, String>>();
@@ -116,15 +118,16 @@ public class LearnListActivity extends Activity{
             case 0:
             	rootView = inflater.inflate(R.layout.question_list, container, false);
             	qList = (ListView)rootView.findViewById(R.id.list);
-            	HashMap<String, String> value1 = new HashMap<String, String>();            	
-            	value1.put(KEY_QUESTION, "mobile");
-            	questionList.add(value1);
-            	HashMap<String, String> value2 = new HashMap<String, String>();
-            	value2.put(KEY_QUESTION, "fuck");
-            	questionList.add(value2);
-            	HashMap<String, String> value3 = new HashMap<String, String>();
-            	value3.put(KEY_QUESTION, "you");
-            	questionList.add(value3);
+            	mp = new MainProvider(getActivity());
+            	
+            	mp.open();
+            	Cursor result = mp.fetchAllQuestion();
+            	while(result.moveToNext()){
+            		HashMap<String, String> value = new HashMap<String, String>();            	
+                	value.put(KEY_QUESTION, result.getString(1));
+                	questionList.add(value);
+        		}
+            	mp.close();
             	
             	qAdapter = new QuestionAdapter(getActivity(), questionList);
             	qList.setAdapter(qAdapter);

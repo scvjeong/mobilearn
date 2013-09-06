@@ -39,7 +39,7 @@ public class MainActivity extends Activity implements OnClickListener{
 		
         mp = new MainProvider(this);
         mp.open();
-        mp.createQuestion("tariff");
+        //mp.createQuestion("aaatariff");
 		
 		Log.d("Main", "Activity :: MainActivity");
 		Cursor result = mp.fetchAllQuestion();
