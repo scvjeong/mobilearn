@@ -10,6 +10,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
  
 import org.apache.http.client.ClientProtocolException;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.util.Log;
@@ -24,7 +25,7 @@ public class JSONParser {
 		
 	}
 	
-	public String getJSONFromUrl(String u) {
+	public JSONObject getJSONFromUrl(String u, String action) {
 		 
 		HttpURLConnection conn = null;
 		
@@ -69,8 +70,15 @@ public class JSONParser {
         } finally{
         	conn.disconnect();
         }
+        
+        try {
+        	jObj = new JSONObject(json);
+        	jObj.put("action", action);
+        	
+	    } catch (JSONException e) {
+	        e.printStackTrace();
+	    }          
 
-        // return JSON String
-        return json;
+        return jObj;
     }
 }

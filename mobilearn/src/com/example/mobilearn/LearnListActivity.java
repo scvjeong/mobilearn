@@ -45,6 +45,7 @@ public class LearnListActivity extends Activity{
     
     static final String KEY_QUESTION = "mobile";
     
+    
     @Override
     public void onCreate(Bundle savedInstanceState) {
     	Log.d("LearnListActivity", "onCreate start");
@@ -99,7 +100,7 @@ public class LearnListActivity extends Activity{
         mtitle.setText(title);
     }
 
-    public static class ContentFragment extends Fragment implements LoaderCallbacks<String>{
+    public static class ContentFragment extends Fragment implements LoaderCallbacks<JSONObject>{
     	
     	private ArrayList<HashMap<String, String>> questionList = new ArrayList<HashMap<String, String>>();
     	private ListView qList;
@@ -120,17 +121,20 @@ public class LearnListActivity extends Activity{
         	Log.d("LearnListActivity","ContentFragment:onCreateView start" );
             
             int i = getArguments().getInt(ARG_PLANET_NUMBER);
+            Cursor result;
+            Bundle args;
+            String url;
             
             Log.d("LearnListActivity","i : " + i );
             switch(i){
             case 1:
-            	
             	rootView = inflater.inflate(R.layout.question_list, container, false);
             	qList = (ListView)rootView.findViewById(R.id.list);
+            	questionList = new ArrayList<HashMap<String, String>>();
             	
             	mp = new MainProvider(getActivity());
             	mp.open();
-            	Cursor result = mp.fetchAllQuestion();
+            	result = mp.fetchAllQuestion();
             	while(result.moveToNext()){
             		HashMap<String, String> value = new HashMap<String, String>();            	
                 	value.put(KEY_QUESTION, result.getString(1));
@@ -140,7 +144,24 @@ public class LearnListActivity extends Activity{
             	
             	qAdapter = new QuestionAdapter(getActivity(), questionList);
             	qList.setAdapter(qAdapter);
-       	        
+            	break;
+            case 2:
+            	rootView = inflater.inflate(R.layout.question_list, container, false);
+            	qList = (ListView)rootView.findViewById(R.id.list);
+            	questionList = new ArrayList<HashMap<String, String>>();
+            	
+            	mp = new MainProvider(getActivity());
+            	mp.open();
+            	result = mp.fetchAllLibrary();
+            	while(result.moveToNext()){
+            		HashMap<String, String> value = new HashMap<String, String>();            	
+                	value.put(KEY_QUESTION, result.getString(1));
+                	questionList.add(value);
+        		}
+            	mp.close();
+            	
+            	qAdapter = new QuestionAdapter(getActivity(), questionList);
+            	qList.setAdapter(qAdapter);
             	break;
             case 5:
             	rootView = inflater.inflate(R.layout.setting, container, false);
@@ -155,21 +176,25 @@ public class LearnListActivity extends Activity{
             		}            		
             	});
             	break;
-            case 50:
-            	
-            	rootView = inflater.inflate(R.layout.question_list, container, false);
-            	qList = (ListView)rootView.findViewById(R.id.list);
-            	
-            	Bundle args = new Bundle();
+            case 6:
+            	args = new Bundle();
             	//String url = "http://img.kr:3000/res/library/update/16391";
-            	String url = "http://img.kr:3000/res/library/16391";
+            	url = "http://img.kr:3000/res/library/question/16391";
        	        args.putString("url", url);
-       	        args.putBoolean("update_check", true);
-
+       	        args.putString("action", "question");
        	        getLoaderManager().initLoader(0, args, this);
-            	
-       	        
-            	break;            	
+            	break;
+            case 7:
+            	args = new Bundle();
+       	        url = "http://img.kr:3000/res/library";
+       	        args.putString("url", url);
+    	        args.putString("action", "library");
+    	        getLoaderManager().initLoader(0, args, this);
+            	break;
+            case 8:
+            	mp = new MainProvider(getActivity());
+            	mp.init();
+            	break;
            	default:
            		rootView = inflater.inflate(R.layout.fragment_menu, container, false);
             }
@@ -177,43 +202,61 @@ public class LearnListActivity extends Activity{
         }
 
 		@Override
-		public Loader<String> onCreateLoader(int ID, Bundle args) {
+		public Loader<JSONObject> onCreateLoader(int ID, Bundle args) {
 			// TODO Auto-generated method stub
 			if(args != null){
 				String url = args.getString("url");
+				String action = args.getString("action");
 				Log.d("LearnListActivity", "onCreateLoader");
-				return new GetServerData(getActivity(), url);
+				return new GetServerData(getActivity(), url, action);
 			}
 			else
 				return null;
 		}
-
+		
 		@Override
-		public void onLoadFinished(Loader<String> loader, String json) {
+		public void onLoadFinished(Loader<JSONObject> loader, JSONObject json) {
+			// TODO Auto-generated method stub
 			ContentsManager cm = new ContentsManager(getActivity());
-			cm.setQuestions(json);
+			String action = "";
+			
+			try {
+				action = json.getString("action");
+			} catch (JSONException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			if(action ==  "question"){
+				cm.setQuestions(json);
+			} else if(action == "library"){
+				cm.setContents(json);
+			}
+			
+
 		}
 
 		@Override
-		public void onLoaderReset(Loader<String> arg0) {
+		public void onLoaderReset(Loader<JSONObject> arg0) {
 			// TODO Auto-generated method stub
 			
 		}
     }
 
-    public static class GetServerData extends AsyncTaskLoader<String>{
+    public static class GetServerData extends AsyncTaskLoader<JSONObject>{
     	
         private String url;
+        private String action;
         
-        public GetServerData(Context context, String url){
+        public GetServerData(Context context, String url, String action){
         	super(context);
         	this.url = url;        	
+        	this.action = action;
         }
         
         @Override
-    	public String loadInBackground(){
+    	public JSONObject loadInBackground(){
         	JSONParser jParser = new JSONParser();
-    		return jParser.getJSONFromUrl(this.url);
+    		return jParser.getJSONFromUrl(this.url, this.action);
     	}
     	
     	protected void onStartLoading(){

@@ -15,29 +15,57 @@ public class ContentsManager {
 		this.mCtx = ctx;
 	}
 	
-	public void setQuestions(String json){
+	public void setQuestions(JSONObject json){
 		JSONArray contacts = null;
 		mp = new MainProvider(mCtx);
 		mp.open();
 		
 	    try {
-			JSONObject jObj = new JSONObject(json);
 	        // Getting Array of Contacts
-	        contacts = jObj.getJSONArray("learn");
+	        contacts = json.getJSONArray("question_list");
 	         
 	        // looping through All Contacts
 	        for(int j = 0; j < contacts.length(); j++){
 	            JSONObject c = contacts.getJSONObject(j);
 	             
 	            // Storing each json item in variable
-	            String oid  = c.getString("oid");
 	            String question  = c.getString("question");
-	            int oid_learn  = Integer.parseInt(c.getString("oid_learn"));
+	            int oid_learn  = Integer.parseInt(c.getString("oid_library"));
 	            mp.createQuestion(question, oid_learn);
 	        }
 	    } catch (JSONException e) {
 	        e.printStackTrace();
-	    }            
+	    } finally{
+        	mp.close();
+        }      
+	}
+	
+	public void setContents(JSONObject json){
+		JSONArray contacts = null;
+		mp = new MainProvider(mCtx);
+		mp.open();
+		
+	    try {
+	        // Getting Array of Contacts
+	        contacts = json.getJSONArray("library");
+	         
+	        // looping through All Contacts
+	        for(int j = 0; j < contacts.length(); j++){
+	            JSONObject c = contacts.getJSONObject(j);
+	             
+	            // Storing each json item in variable
+	            String name  = c.getString("name");
+	            int type  = Integer.parseInt(c.getString("type"));
+	            String update_date  = c.getString("update_date");
+	            int is_use = 1;
+	            
+	            mp.insertLibrary(name, type, update_date, is_use);
+	        }
+	    } catch (JSONException e) {
+	        e.printStackTrace();
+	    } finally{
+        	mp.close();
+        }
 	}
 	
 	/*

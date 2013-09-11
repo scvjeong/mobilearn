@@ -22,7 +22,9 @@
         <item>Feedback</item>
         <item>Market</item>
         <item>Setting</item>
-        <item>Update(임시)</item>
+        <item>contents_update(dev)</item>
+        <item>library_update(dev)</item>
+        <item>db_init(dev)</item>
     </string-array>
     
 </resources>
