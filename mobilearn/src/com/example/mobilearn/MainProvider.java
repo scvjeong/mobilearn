@@ -10,8 +10,9 @@ import android.util.Log;
  
 public class MainProvider {
  
+	public static final String KEY_OID_LEARN = "oid_learn";
     public static final String KEY_QUESTION = "question";
-    public static final String KEY_ROWID = "idx";
+    public static final String KEY_OID = "oid";
     private static final String TAG = "MainProvider";
  
     private DatabaseHelper mDbHelper;
@@ -22,11 +23,13 @@ public class MainProvider {
      * Database creation sql statement
      */
  
-    private static final String DATABASE_CREATE = "create table questions (idx integer primary key autoincrement, "
-            + "question text not null);";
+    private static final String DATABASE_CREATE = "create table questions (oid integer primary key, "
+            + "question text not null, oid_learn interger not null);"
+    		+ "create table learn (oid integer primary key, "
+    		+ "name text not null, type integer not null, update_date integer not null);";
  
     private static final String DATABASE_NAME = "mobilearn";
-    private static final String DATABASE_TABLE = "questions";
+    private static final String TABLE_QUESTION = "questions";
     private static final int DATABASE_VERSION = 2;
     private final Context mCtx;
  
@@ -39,6 +42,8 @@ public class MainProvider {
         @Override
         public void onCreate(SQLiteDatabase db) {
         	Log.d("MainProvider", "Provider :: DatabaseHelper:onCreate");
+        	db.execSQL("DROP TABLE IF EXISTS learn");
+            db.execSQL("DROP TABLE IF EXISTS questions");
             db.execSQL(DATABASE_CREATE);
         }
  
@@ -46,6 +51,7 @@ public class MainProvider {
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
             Log.w(TAG, "Upgrading database from version " + oldVersion + " to " + newVersion
                     + ", which will destroy all old data");
+            db.execSQL("DROP TABLE IF EXISTS learn");
             db.execSQL("DROP TABLE IF EXISTS questions");
             onCreate(db);
         }
@@ -59,32 +65,38 @@ public class MainProvider {
     	Log.d("MainProvider", "Provider :: MainProvider:open()");
         mDbHelper = new DatabaseHelper(mCtx);
         mDb = mDbHelper.getWritableDatabase();
-        //mDbHelper.onCreate(mDb);
         return this;
     }
- 
+    
+    public MainProvider init() throws SQLException {
+    	mDbHelper = new DatabaseHelper(mCtx);
+    	mDbHelper.onCreate(mDb);
+    	return this;
+    }
+
     public void close() {
         mDbHelper.close();
     }
  
-    public long createQuestion(String question) {
+    public long createQuestion(String question, int oid_learn) {
         ContentValues initialValues = new ContentValues();
         initialValues.put(KEY_QUESTION, question);
-        return mDb.insert(DATABASE_TABLE, null, initialValues);
+        initialValues.put(KEY_OID_LEARN, oid_learn);
+        return mDb.insert(TABLE_QUESTION, null, initialValues);
     }
  
     public boolean deleteQuestion(long rowId) {
         Log.i("Delete called", "value__" + rowId);
-        return mDb.delete(DATABASE_TABLE, KEY_ROWID + "=" + rowId, null) > 0;
+        return mDb.delete(TABLE_QUESTION, KEY_OID + "=" + rowId, null) > 0;
     }
  
     public Cursor fetchAllQuestion() {
-        return mDb.query(DATABASE_TABLE, new String[] { KEY_ROWID, KEY_QUESTION }, null, null, null, null, null);
+        return mDb.query(TABLE_QUESTION, new String[] { KEY_OID, KEY_QUESTION }, null, null, null, null, KEY_QUESTION + " ASC");
     }
  
     public Cursor fetchQuestion(long rowId) throws SQLException {
  
-        Cursor mCursor = mDb.query(true, DATABASE_TABLE, new String[] { KEY_ROWID, KEY_QUESTION }, KEY_ROWID
+        Cursor mCursor = mDb.query(true, TABLE_QUESTION, new String[] { KEY_OID, KEY_QUESTION }, KEY_OID
                 + "=" + rowId, null, null, null, null, null);
         if (mCursor != null) {
             mCursor.moveToFirst();
@@ -95,7 +107,7 @@ public class MainProvider {
     public boolean updateNote(long rowId, String question) {
         ContentValues args = new ContentValues();
         args.put(KEY_QUESTION, question);
-        return mDb.update(DATABASE_TABLE, args, KEY_ROWID + "=" + rowId, null) > 0;
+        return mDb.update(TABLE_QUESTION, args, KEY_OID + "=" + rowId, null) > 0;
     }
  
 }

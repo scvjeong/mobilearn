@@ -3,10 +3,18 @@ package com.example.mobilearn;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
+import android.app.LoaderManager.LoaderCallbacks;
+import android.content.AsyncTaskLoader;
+import android.content.Context;
 import android.content.Intent;
+import android.content.Loader;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
@@ -91,11 +99,15 @@ public class LearnListActivity extends Activity{
         mtitle.setText(title);
     }
 
-    public static class ContentFragment extends Fragment {
+    public static class ContentFragment extends Fragment implements LoaderCallbacks<String>{
     	
+    	private ArrayList<HashMap<String, String>> questionList = new ArrayList<HashMap<String, String>>();
+    	private ListView qList;
+        private QuestionAdapter qAdapter;
     	private MainProvider mp;
     	private Switch swc;
-    	private ListView list;
+    	private View rootView;
+    	
         public static final String ARG_PLANET_NUMBER = "planet_number";
 
         public ContentFragment() {
@@ -106,20 +118,17 @@ public class LearnListActivity extends Activity{
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                 Bundle savedInstanceState) {
         	Log.d("LearnListActivity","ContentFragment:onCreateView start" );
-            View rootView;
-            ArrayList<HashMap<String, String>> questionList = new ArrayList<HashMap<String, String>>();
-            ListView qList;
-            QuestionAdapter qAdapter;    
             
             int i = getArguments().getInt(ARG_PLANET_NUMBER);
             
             Log.d("LearnListActivity","i : " + i );
             switch(i){
-            case 0:
+            case 1:
+            	
             	rootView = inflater.inflate(R.layout.question_list, container, false);
             	qList = (ListView)rootView.findViewById(R.id.list);
-            	mp = new MainProvider(getActivity());
             	
+            	mp = new MainProvider(getActivity());
             	mp.open();
             	Cursor result = mp.fetchAllQuestion();
             	while(result.moveToNext()){
@@ -131,9 +140,9 @@ public class LearnListActivity extends Activity{
             	
             	qAdapter = new QuestionAdapter(getActivity(), questionList);
             	qList.setAdapter(qAdapter);
-            	
+       	        
             	break;
-            case 3:
+            case 5:
             	rootView = inflater.inflate(R.layout.setting, container, false);
             	swc = (Switch)rootView.findViewById(R.id.switch_lock_screen); 
             	swc.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener(){
@@ -146,10 +155,69 @@ public class LearnListActivity extends Activity{
             		}            		
             	});
             	break;
+            case 50:
+            	
+            	rootView = inflater.inflate(R.layout.question_list, container, false);
+            	qList = (ListView)rootView.findViewById(R.id.list);
+            	
+            	Bundle args = new Bundle();
+            	//String url = "http://img.kr:3000/res/library/update/16391";
+            	String url = "http://img.kr:3000/res/library/16391";
+       	        args.putString("url", url);
+       	        args.putBoolean("update_check", true);
+
+       	        getLoaderManager().initLoader(0, args, this);
+            	
+       	        
+            	break;            	
            	default:
            		rootView = inflater.inflate(R.layout.fragment_menu, container, false);
             }
             return rootView;
         }
+
+		@Override
+		public Loader<String> onCreateLoader(int ID, Bundle args) {
+			// TODO Auto-generated method stub
+			if(args != null){
+				String url = args.getString("url");
+				Log.d("LearnListActivity", "onCreateLoader");
+				return new GetServerData(getActivity(), url);
+			}
+			else
+				return null;
+		}
+
+		@Override
+		public void onLoadFinished(Loader<String> loader, String json) {
+			ContentsManager cm = new ContentsManager(getActivity());
+			cm.setQuestions(json);
+		}
+
+		@Override
+		public void onLoaderReset(Loader<String> arg0) {
+			// TODO Auto-generated method stub
+			
+		}
+    }
+
+    public static class GetServerData extends AsyncTaskLoader<String>{
+    	
+        private String url;
+        
+        public GetServerData(Context context, String url){
+        	super(context);
+        	this.url = url;        	
+        }
+        
+        @Override
+    	public String loadInBackground(){
+        	JSONParser jParser = new JSONParser();
+    		return jParser.getJSONFromUrl(this.url);
+    	}
+    	
+    	protected void onStartLoading(){
+        	forceLoad();
+    	}
     }
 }
