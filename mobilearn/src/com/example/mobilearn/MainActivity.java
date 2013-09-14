@@ -1,10 +1,15 @@
 package com.example.mobilearn;
 
+import java.util.Random;
+
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.WindowManager.LayoutParams;
+import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.app.Activity;
@@ -16,12 +21,10 @@ public class MainActivity extends Activity implements OnClickListener{
 	
 	private TextView date;
 	private TextView q1;
-	private TextView tv1;
-	private TextView tv2; 
-	private TextView tv3; 
-	private TextView tv4; 
-	private TextView tv5; 
-	private TextView tv6; 
+		
+	private static int ANSWER_MAX_NUM = 6;
+	private static int REPLY_MAX_NUM = 50;
+	private int answerNum;
 	/*
 	@Override
 	public void onAttachedToWindow(){
@@ -39,46 +42,83 @@ public class MainActivity extends Activity implements OnClickListener{
 		
         mp = new MainProvider(this);
         mp.open();
-        mp.init();
 		
 		Log.d("Main", "Activity :: MainActivity");
-		Cursor result = mp.fetchAllQuestion();
+		Cursor result = mp.fetchQuestion(16391);
 		q1 = (TextView)findViewById(R.id.q1);
-		while(result.moveToNext()){
-			q1.setText( result.getString(1) );
-		}
 		
-		date = (TextView)findViewById(R.id.date);
+		long oid_question = 0;
+		Random random = new Random();
+		int num = random.nextInt(10);
+		if(result.move(num)){
+			q1.setText( result.getString(1) );
+			oid_question = result.getInt(0);
+
+			int idx = 0;
+			int answerCount;
+			String answerString = "";
+			Cursor answerResult = mp.fetchTrueAnswer(oid_question);
+			answerCount = answerResult.getCount();
+			idx = random.nextInt(answerCount);	
+			if( answerResult.move(idx) ){
+				answerString = answerResult.getString(0);
+			}
+			
+			Cursor replyResult = mp.fetchFalseAnswer(oid_question, REPLY_MAX_NUM);
+			int answerNum = random.nextInt(ANSWER_MAX_NUM);
+			String[] reply = {"a", "b", "c", "d", "e", "f"};
+			makingAnswer(answerString, answerNum, reply);
+		}
+		else
+			finish();
 		
 		String time = android.text.format.DateFormat.format("yyyy-MM-dd aa h:mm", System.currentTimeMillis()).toString();
 
 		date = (TextView)findViewById(R.id.date);
 		date.setText(time);
+	}
+	
+	public void makingAnswer(String answer, int answerNum, String[] reply){
+		
+		this.answerNum = answerNum;
+		LinearLayout answerView = (LinearLayout)findViewById(R.id.answer_list);
+		TextView answerText;
+		
+		int i;
+		for(i=0; i<ANSWER_MAX_NUM; i++){
+			answerText = new TextView(this);
+			answerText.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
+			answerText.setGravity(0x11);
+			answerText.setTextSize(20);
+			answerText.setPadding(0, 10, 0, 10);
+			answerText.setId(i);
+			if(i==answerNum) 
+				answerText.setText(answer);
+			else
+				answerText.setText(reply[i]);
+			
+			answerText.setOnClickListener(this);
+			answerView.addView(answerText);
+		}
 				
-		tv1 = (TextView)findViewById(R.id.answer1);
-		tv2 = (TextView)findViewById(R.id.answer2);
-		tv3 = (TextView)findViewById(R.id.answer3);
-		tv4 = (TextView)findViewById(R.id.answer4);
-		tv5 = (TextView)findViewById(R.id.answer5);
-		tv6 = (TextView)findViewById(R.id.answer6);
-		tv1.setOnClickListener(this);
-		tv2.setOnClickListener(this);
-		tv3.setOnClickListener(this);
-		tv4.setOnClickListener(this);
-		tv5.setOnClickListener(this);
-		tv6.setOnClickListener(this);
 	}
 	
 	@Override
 	public void onClick(View v) {
-		if( this.markingQuestion(v.getId()) )
+		if( this.makingAnswerClickListener(v.getId()) )
 			finish();
 	}
 	
-	boolean markingQuestion(int id)
+	public boolean makingAnswerClickListener(int id)
 	{
-		int ca_num = 2;
 		boolean ca = false;
+		if( id == this.answerNum ) {
+			Toast.makeText(this, "correct", Toast.LENGTH_SHORT).show();
+			ca = true;
+		} else {
+			Toast.makeText(this, "incorrect", Toast.LENGTH_SHORT).show();
+		}
+		/*
 		switch(id){
 		case R.id.answer1:
 			if( ca_num == 1 ) {
@@ -129,7 +169,7 @@ public class MainActivity extends Activity implements OnClickListener{
 				Toast.makeText(this, "incorrect", Toast.LENGTH_SHORT).show();
 			break;
 		}
-		
+		*/
 		return ca;
 	}
 	/*

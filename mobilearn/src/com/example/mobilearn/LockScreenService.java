@@ -1,6 +1,11 @@
 package com.example.mobilearn;
 
+import java.util.Iterator;
+import java.util.List;
+
 import android.app.Activity;
+import android.app.ActivityManager;
+import android.app.ActivityManager.RunningTaskInfo;
 import android.app.KeyguardManager;
 import android.app.Service;
 import android.content.BroadcastReceiver;
@@ -20,19 +25,20 @@ public class LockScreenService extends Service {
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			Toast.makeText(context, "서비스 실행중!", Toast.LENGTH_LONG).show();
+			
             String action = intent.getAction();
 			if(action.equals("android.intent.action.SCREEN_OFF")){
             	Intent i = new Intent(context, MainActivity.class);
-            	i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            	i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
             	context.startActivity(i);
             }
 			else if(action.equals(Intent.ACTION_SCREEN_ON)){
             	Intent i = new Intent(context, MainActivity.class);
-            	i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            	i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
             }
 			else if(action.equals(Intent.ACTION_BOOT_COMPLETED)){
             	Intent i = new Intent(context, MainActivity.class);
-            	i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            	i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
             }
 		}
 	};

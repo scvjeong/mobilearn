@@ -5,6 +5,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.Context;
+import android.util.Log;
 
 public class ContentsManager {
 	
@@ -29,9 +30,10 @@ public class ContentsManager {
 	            JSONObject c = contacts.getJSONObject(j);
 	             
 	            // Storing each json item in variable
+	            int oid  = Integer.parseInt(c.getString("oid"));
 	            String question  = c.getString("question");
-	            int oid_learn  = Integer.parseInt(c.getString("oid_library"));
-	            mp.createQuestion(question, oid_learn);
+	            int oid_library  = Integer.parseInt(c.getString("oid_library"));
+	            mp.createQuestion(oid, question, oid_library);
 	        }
 	    } catch (JSONException e) {
 	        e.printStackTrace();
@@ -40,7 +42,34 @@ public class ContentsManager {
         }      
 	}
 	
-	public void setContents(JSONObject json){
+	public void setAnswers(JSONObject json){
+		JSONArray contacts = null;
+		mp = new MainProvider(mCtx);
+		mp.open();
+		
+	    try {
+	        // Getting Array of Contacts
+	        contacts = json.getJSONArray("answers");
+	         
+	        // looping through All Contacts
+	        for(int j = 0; j < contacts.length(); j++){
+	            JSONObject c = contacts.getJSONObject(j);
+	             
+	            // Storing each json item in variable
+	            int oid  = Integer.parseInt(c.getString("oid"));
+	            String reply  = c.getString("reply");
+	            int answer  = Integer.parseInt(c.getString("answer"));
+	            int oid_question  = Integer.parseInt(c.getString("oid_question"));
+	            mp.insertAnswer(oid, reply, answer, oid_question);
+	        }
+	    } catch (JSONException e) {
+	        e.printStackTrace();
+	    } finally{
+        	mp.close();
+        }      
+	}
+	
+	public void setLibrary(JSONObject json){
 		JSONArray contacts = null;
 		mp = new MainProvider(mCtx);
 		mp.open();
@@ -54,12 +83,13 @@ public class ContentsManager {
 	            JSONObject c = contacts.getJSONObject(j);
 	             
 	            // Storing each json item in variable
+	            int oid  = Integer.parseInt(c.getString("oid"));
 	            String name  = c.getString("name");
 	            int type  = Integer.parseInt(c.getString("type"));
 	            String update_date  = c.getString("update_date");
 	            int is_use = 1;
 	            
-	            mp.insertLibrary(name, type, update_date, is_use);
+	            mp.insertLibrary(oid, name, type, update_date, is_use);
 	        }
 	    } catch (JSONException e) {
 	        e.printStackTrace();

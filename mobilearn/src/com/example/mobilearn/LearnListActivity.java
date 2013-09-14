@@ -186,12 +186,20 @@ public class LearnListActivity extends Activity{
             	break;
             case 7:
             	args = new Bundle();
+            	//String url = "http://img.kr:3000/res/library/update/16391";
+            	url = "http://img.kr:3000/res/library/answer/16391";
+       	        args.putString("url", url);
+       	        args.putString("action", "answer");
+       	        getLoaderManager().initLoader(0, args, this);
+            	break;
+            case 8:
+            	args = new Bundle();
        	        url = "http://img.kr:3000/res/library";
        	        args.putString("url", url);
     	        args.putString("action", "library");
     	        getLoaderManager().initLoader(0, args, this);
             	break;
-            case 8:
+            case 9:
             	mp = new MainProvider(getActivity());
             	mp.init();
             	break;
@@ -228,11 +236,11 @@ public class LearnListActivity extends Activity{
 			}
 			if(action ==  "question"){
 				cm.setQuestions(json);
+			} else if(action == "answer"){
+				cm.setAnswers(json);
 			} else if(action == "library"){
-				cm.setContents(json);
+				cm.setLibrary(json);
 			}
-			
-
 		}
 
 		@Override
