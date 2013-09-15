@@ -16,12 +16,12 @@
     <string name="unlock">탭하여 잠금해제(5)</string>
     
     <string-array name="menu_list">
-        <item>Main</item>
-        <item>My</item>
-        <item>Library</item>
-        <item>Feedback</item>
-        <item>Market</item>
-        <item>Setting</item>
+        <item>MAIN</item>
+        <item>MY</item>
+        <item>LIBRARY</item>
+        <item>STATISTICS</item>
+        <item>MARKET</item>
+        <item>SETTING</item>
         <item>questions_update(dev)</item>
         <item>answers_update(dev)</item>
         <item>library_update(dev)</item>

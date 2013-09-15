@@ -63,12 +63,10 @@ public class LearnListActivity extends Activity{
         mList = getResources().getStringArray(R.array.menu_list);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         mDrawerList = (ListView) findViewById(R.id.left_drawer);
-        Log.d("LearnListActivity", "setAdapter start");
         mDrawerList.setAdapter(new ArrayAdapter<String>(this,
                 R.layout.menu_list_item, mList));
-        Log.d("LearnListActivity", "setOnItemClickListener start");
         mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
-        Log.d("LearnListActivity", "onCreate end");
+        selectItem(0);
     }
 
     /* The click listner for ListView in the navigation drawer */
@@ -93,13 +91,12 @@ public class LearnListActivity extends Activity{
         mDrawerList.setItemChecked(position, true);
         setTitle(mList[position]);
         mDrawerLayout.closeDrawer(mDrawerList);
-        Log.d("LearnListActivity", "selectItem end");
     }
     
     @Override
     public void setTitle(CharSequence title) {
         mtitle = (TextView)findViewById(R.id.title);
-        mtitle.setText(title);
+        //mtitle.setText(title);
     }
 
     public static class ContentFragment extends Fragment implements LoaderCallbacks<JSONObject>{
@@ -116,18 +113,16 @@ public class LearnListActivity extends Activity{
         public ContentFragment() {
             // Empty constructor required for fragment subclasses
         }
-
+        
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                 Bundle savedInstanceState) {
-        	Log.d("LearnListActivity","ContentFragment:onCreateView start" );
-            
-            int i = getArguments().getInt(ARG_PLANET_NUMBER);
+
+        	int i = getArguments().getInt(ARG_PLANET_NUMBER);
             Cursor result;
             Bundle args;
-            String url;
+            String url, state;
             
-            Log.d("LearnListActivity","i : " + i );
             switch(i){
             case 1:
             	rootView = inflater.inflate(R.layout.question_list, container, false);
@@ -138,11 +133,20 @@ public class LearnListActivity extends Activity{
             	mp.open();
             	result = mp.fetchAllQuestion();
             	while(result.moveToNext()){
-            		Log.e("onCreateView","result.getInt(2) : " + result.getString(2) );
             		HashMap<String, String> value = new HashMap<String, String>();            	
                 	value.put(KEY_QUESTION, result.getString(1));
                 	value.put(KEY_PERSENT, result.getString(3) + "/" + result.getString(2));
-                	value.put(KEY_STATE, result.getString(4));
+                	
+                	switch(result.getInt(4))
+                	{
+                	case 0:
+                		state = "기초학습";
+                		break;
+                	default:
+                		state = "기초학습";
+                	}
+                	value.put(KEY_STATE, state);
+                	
                 	questionList.add(value);
         		}
             	mp.close();

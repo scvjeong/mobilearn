@@ -20,5 +20,4 @@
     <style name="WindowTitlebarBackground">
         <item name="android:background">@drawable/custom_titlebar</item>        
     </style>
-
 </resources>
