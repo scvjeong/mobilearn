@@ -21,6 +21,9 @@ public class MainProvider {
     public static final String KEY_REPLY = "reply";
     public static final String KEY_ANSWER = "answer";
     public static final String KEY_OID_QUESTION = "oid_question";
+    public static final String KEY_CORRECT_ANSWER_CNT = "correct_answer_cnt";
+    public static final String KEY_STATE = "state";
+    
     private static final String TAG = "MainProvider";
  
     private DatabaseHelper mDbHelper;
@@ -33,7 +36,8 @@ public class MainProvider {
     private static final String TABLE_ANSWER_CREATE = "create table answers (oid integer primary key, "
             + "reply text not null, answer integer not null, oid_question integer not null );";
     private static final String TABLE_QUESTION_CREATE = "create table questions (oid integer primary key, "
-            + "question text not null, oid_library integer not null, count integer default 0 );";
+            + "question text not null, oid_library integer not null, count integer default 0, "
+    		+ "correct_answer_cnt integer default 0, state integer default 0);";
     private static final String TABLE_LIBRARY_CREATE = "create table library (oid integer primary key, "
     		+ "name text not null, type integer not null, update_date text not null, "
     		+ "is_use integer not null);";
@@ -112,26 +116,56 @@ public class MainProvider {
     }
  
     public Cursor fetchAllQuestion() {
-        return mDb.query(TABLE_QUESTION, new String[] { KEY_OID, KEY_QUESTION }, null, null, null, null, KEY_QUESTION + " ASC");
+    	String sql = "SELECT " + KEY_OID +", "
+    			+ KEY_QUESTION + ", " 
+    			+ KEY_COUNT + ", "
+    			+ KEY_CORRECT_ANSWER_CNT + ", "
+    			+ KEY_STATE + " "
+    			+ " FROM " + TABLE_QUESTION
+    			+ " ORDER BY " + KEY_QUESTION + " ASC";
+        Cursor mCursor = mDb.rawQuery(sql, null);
+        if (mCursor != null) {
+            mCursor.moveToFirst();
+        }
+        return mCursor;
+        //return mDb.query(TABLE_QUESTION, new String[] { KEY_OID, KEY_QUESTION, KEY_COUNT, KEY_CORRECT_ANSWER_CNT, KEY_STATE }, null, null, null, null, KEY_QUESTION + " ASC");
     }
  
-    public Cursor fetchQuestion(int oid_library) throws SQLException {
+    public Cursor fetchQuestion(int oid_library, int limit) throws SQLException {
     	String sql = "SELECT oid, question " 
     			+ " FROM " + TABLE_QUESTION
     			+ " WHERE "+ KEY_OID_LIBRARY +" = " + oid_library
-    			+ " ORDER BY count ASC"
-    			+ " LIMIT 10";
+    			+ " ORDER BY count ASC, oid ASC"
+    			+ " LIMIT " + limit;
         Cursor mCursor = mDb.rawQuery(sql, null);
         if (mCursor != null) {
             mCursor.moveToFirst();
         }
         return mCursor;
     }
- 
-    public boolean updateNote(long rowId, String question) {
+    
+    public void updateCountQuestion(long oid) {
+    	String sql = "UPDATE " + TABLE_QUESTION 
+    			+ " SET " + KEY_COUNT + " = " + KEY_COUNT + " + 1 "
+    			+ " WHERE " + KEY_OID + " = " + oid;
+        mDb.execSQL(sql);
+        /*
         ContentValues args = new ContentValues();
-        args.put(KEY_QUESTION, question);
-        return mDb.update(TABLE_QUESTION, args, KEY_OID + "=" + rowId, null) > 0;
+        args.put(KEY_COUNT, KEY_COUNT + 1);
+        return mDb.update(TABLE_QUESTION, args, KEY_OID + "=" + oid, null) > 0;
+        */
+    }
+    
+    public void updateCorrectQuestion(long oid) {
+    	String sql = "UPDATE " + TABLE_QUESTION 
+    			+ " SET " + KEY_CORRECT_ANSWER_CNT + " = " + KEY_CORRECT_ANSWER_CNT + " + 1 "
+    			+ " WHERE " + KEY_OID + " = " + oid;
+        mDb.execSQL(sql);
+        /*
+        ContentValues args = new ContentValues();
+        args.put(KEY_CORRECT_ANSWER_CNT, KEY_CORRECT_ANSWER_CNT + 1);
+        return mDb.update(TABLE_QUESTION, args, KEY_OID + "=" + oid, null) > 0;
+        */
     }
     
     public long insertLibrary(int oid, String name, int type, String update_date, int is_use) {

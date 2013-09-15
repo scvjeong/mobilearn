@@ -21,10 +21,14 @@ public class MainActivity extends Activity implements OnClickListener{
 	
 	private TextView date;
 	private TextView q1;
-		
-	private static int ANSWER_MAX_NUM = 6;
-	private static int REPLY_MAX_NUM = 50;
+	
+	private static int QUESTION_NUM = 50;
+	private static int REPLY_MAX_NUM = 6;
+	private static int NO_ANSWER_MAX_NUM = 100;
 	private int answerNum;
+	private boolean is_first = true;
+	private long oid_question;
+
 	/*
 	@Override
 	public void onAttachedToWindow(){
@@ -44,38 +48,50 @@ public class MainActivity extends Activity implements OnClickListener{
         mp.open();
 		
 		Log.d("Main", "Activity :: MainActivity");
-		Cursor result = mp.fetchQuestion(16391);
+		Cursor result = mp.fetchQuestion(16391, QUESTION_NUM);
 		q1 = (TextView)findViewById(R.id.q1);
 		
-		long oid_question = 0;
 		Random random = new Random();
-		int num = random.nextInt(10);
+		int num = random.nextInt(QUESTION_NUM);
 		if(result.move(num)){
 			q1.setText( result.getString(1) );
-			oid_question = result.getInt(0);
-
-			int idx = 0;
+			this.oid_question = result.getInt(0);
+			mp.updateCountQuestion(this.oid_question);
+			
+			int i, idx = 0;
 			int answerCount;
 			String answerString = "";
-			Cursor answerResult = mp.fetchTrueAnswer(oid_question);
+			Cursor answerResult = mp.fetchTrueAnswer(this.oid_question);
 			answerCount = answerResult.getCount();
 			idx = random.nextInt(answerCount);	
 			if( answerResult.move(idx) ){
 				answerString = answerResult.getString(0);
 			}
 			
-			Cursor replyResult = mp.fetchFalseAnswer(oid_question, REPLY_MAX_NUM);
-			int answerNum = random.nextInt(ANSWER_MAX_NUM);
-			String[] reply = {"a", "b", "c", "d", "e", "f"};
+			Cursor replyResult = mp.fetchFalseAnswer(this.oid_question, NO_ANSWER_MAX_NUM);
+			int replyNum = 0;
+			String[] reply = new String[REPLY_MAX_NUM];
+			for(i=0; i<REPLY_MAX_NUM; i++){
+				replyNum = random.nextInt(replyResult.getCount());
+				if( replyResult.move(replyNum) ){
+					reply[i] = replyResult.getString(0);
+					replyResult.moveToFirst();
+				}
+			}
+			this.answerNum = random.nextInt(REPLY_MAX_NUM);  
 			makingAnswer(answerString, answerNum, reply);
 		}
-		else
+		else {
+			mp.close();
 			finish();
+		}
 		
 		String time = android.text.format.DateFormat.format("yyyy-MM-dd aa h:mm", System.currentTimeMillis()).toString();
 
 		date = (TextView)findViewById(R.id.date);
 		date.setText(time);
+		
+		mp.close();
 	}
 	
 	public void makingAnswer(String answer, int answerNum, String[] reply){
@@ -85,18 +101,21 @@ public class MainActivity extends Activity implements OnClickListener{
 		TextView answerText;
 		
 		int i;
-		for(i=0; i<ANSWER_MAX_NUM; i++){
+		int replyNum = reply.length;
+		for(i=0; i<REPLY_MAX_NUM; i++){
 			answerText = new TextView(this);
 			answerText.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
 			answerText.setGravity(0x11);
 			answerText.setTextSize(20);
-			answerText.setPadding(0, 10, 0, 10);
+			answerText.setPadding(0, 15, 0, 15);
 			answerText.setId(i);
 			if(i==answerNum) 
 				answerText.setText(answer);
-			else
+			else if(i < replyNum)
 				answerText.setText(reply[i]);
-			
+			else
+				answerText.setText("");
+				
 			answerText.setOnClickListener(this);
 			answerView.addView(answerText);
 		}
@@ -115,9 +134,15 @@ public class MainActivity extends Activity implements OnClickListener{
 		if( id == this.answerNum ) {
 			Toast.makeText(this, "correct", Toast.LENGTH_SHORT).show();
 			ca = true;
+			if(this.is_first) {
+				mp.open();
+				mp.updateCorrectQuestion(this.oid_question);
+				mp.close();
+			}
 		} else {
 			Toast.makeText(this, "incorrect", Toast.LENGTH_SHORT).show();
 		}
+		this.is_first= false;
 		/*
 		switch(id){
 		case R.id.answer1:

@@ -49,13 +49,15 @@ public class QuestionAdapter extends BaseAdapter{
 		if(convertView == null)
 			vi = inflater.inflate(R.layout.question_list_row, null);
 		TextView title = (TextView)vi.findViewById(R.id.title_of_question);
-		TextView artist = (TextView)vi.findViewById(R.id.artist);
-		TextView duration = (TextView)vi.findViewById(R.id.duration);
+		TextView persent = (TextView)vi.findViewById(R.id.persent);
+		TextView state = (TextView)vi.findViewById(R.id.state);
 		
 		HashMap<String, String> question = new HashMap<String, String>();
 		question = data.get(position);
 		
 		title.setText(question.get(LearnListActivity.KEY_QUESTION));
+		persent.setText(question.get(LearnListActivity.KEY_PERSENT));
+		state.setText(question.get(LearnListActivity.KEY_STATE));
 		
 		return vi;
 	}

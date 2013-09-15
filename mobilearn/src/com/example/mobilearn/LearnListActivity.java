@@ -43,7 +43,9 @@ public class LearnListActivity extends Activity{
     private TextView mtitle;
     private String[] mList;
     
-    static final String KEY_QUESTION = "mobile";
+    static final String KEY_QUESTION = "question_name";
+    static final String KEY_PERSENT = "persent";
+    static final String KEY_STATE = "state";
     
     
     @Override
@@ -136,8 +138,11 @@ public class LearnListActivity extends Activity{
             	mp.open();
             	result = mp.fetchAllQuestion();
             	while(result.moveToNext()){
+            		Log.e("onCreateView","result.getInt(2) : " + result.getString(2) );
             		HashMap<String, String> value = new HashMap<String, String>();            	
                 	value.put(KEY_QUESTION, result.getString(1));
+                	value.put(KEY_PERSENT, result.getString(3) + "/" + result.getString(2));
+                	value.put(KEY_STATE, result.getString(4));
                 	questionList.add(value);
         		}
             	mp.close();
