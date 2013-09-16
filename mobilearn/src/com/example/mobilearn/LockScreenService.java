@@ -17,9 +17,10 @@ import android.util.Log;
 import android.widget.Toast;
 
 public class LockScreenService extends Service {
+	
 	private KeyguardManager km = null; 
 	private KeyguardManager.KeyguardLock keylock = null;
-	
+	public static final String ACTION_CHECK_ALIVE = "com.example.mobilearn.action.CHECK_ALIVE";
 
 	private BroadcastReceiver mReceiver = new BroadcastReceiver(){
 		@Override
@@ -29,9 +30,11 @@ public class LockScreenService extends Service {
             String action = intent.getAction();
 			if(action.equals("android.intent.action.SCREEN_OFF")){
             	Intent i = new Intent(context, MainActivity.class);
-            	i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            	i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK );
+            	//i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
             	context.startActivity(i);
             }
+			/*
 			else if(action.equals(Intent.ACTION_SCREEN_ON)){
             	Intent i = new Intent(context, MainActivity.class);
             	i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
@@ -40,17 +43,18 @@ public class LockScreenService extends Service {
             	Intent i = new Intent(context, MainActivity.class);
             	i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
             }
+            */
 		}
 	};
-	
+
 	@Override
 	public IBinder onBind(Intent intent) {
+		// TODO Auto-generated method stub
 		return null;
 	}
 	
 	@Override
 	public void onCreate() {
-		Log.d("LockScreenService", "LockScreenService::onCreate");
 		// TODO Auto-generated method stub
 		super.onCreate();
 		

@@ -12,22 +12,33 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.LoaderManager.LoaderCallbacks;
 import android.content.AsyncTaskLoader;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
+import android.graphics.PixelFormat;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.widget.DrawerLayout;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.view.WindowManager;
+import android.view.WindowManager.LayoutParams;
+import android.widget.AbsListView;
+import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.ListView;
+import android.widget.SearchView;
+import android.widget.SearchView.OnQueryTextListener;
 import android.widget.Switch;
 import android.widget.TextView;
 
@@ -42,6 +53,11 @@ public class LearnListActivity extends Activity{
     private CharSequence mDrawerTitle;
     private TextView mtitle;
     private String[] mList;
+    
+    private static ComponentName lockScreenService = null;
+    
+    LockScreenService lService;
+    boolean mBound = false;
     
     static final String KEY_QUESTION = "question_name";
     static final String KEY_PERSENT = "persent";
@@ -68,7 +84,12 @@ public class LearnListActivity extends Activity{
         mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
         selectItem(0);
     }
-
+    
+    @Override
+    protected void onStart(){
+    	super.onStart();
+    }
+    
     /* The click listner for ListView in the navigation drawer */
     private class DrawerItemClickListener implements ListView.OnItemClickListener {
         @Override
@@ -96,7 +117,7 @@ public class LearnListActivity extends Activity{
     @Override
     public void setTitle(CharSequence title) {
         mtitle = (TextView)findViewById(R.id.title);
-        //mtitle.setText(title);
+        mtitle.setText(title);
     }
 
     public static class ContentFragment extends Fragment implements LoaderCallbacks<JSONObject>{
@@ -108,7 +129,23 @@ public class LearnListActivity extends Activity{
     	private Switch swc;
     	private View rootView;
     	
+    	private final class RemoveWindow implements Runnable {
+            public void run() {
+                removeWindow();
+            }
+        }
+    	
+    	private RemoveWindow mRemoveWindow = new RemoveWindow();
+    	Handler mHandler = new Handler();
+    	private WindowManager mWindowManager;
+        private TextView mDialogText;
+        private boolean mShowing;
+        private boolean mReady;
+        private char mPrevLetter = Character.MIN_VALUE;
+        private SearchView mSearchView;
+    	
         public static final String ARG_PLANET_NUMBER = "planet_number";
+		private static final OnQueryTextListener OnQueryTextListener = null;
 
         public ContentFragment() {
             // Empty constructor required for fragment subclasses
@@ -124,35 +161,16 @@ public class LearnListActivity extends Activity{
             String url, state;
             
             switch(i){
+            case 0:
+           		rootView = inflater.inflate(R.layout.fragment_menu, container, false);
+           		TextView serviceState = (TextView)rootView.findViewById(R.id.service_state);
+           		if(lockScreenService != null)
+           			serviceState.setText("ON");
+           		else
+           			serviceState.setText("OFF");
+           		break;
             case 1:
-            	rootView = inflater.inflate(R.layout.question_list, container, false);
-            	qList = (ListView)rootView.findViewById(R.id.list);
-            	questionList = new ArrayList<HashMap<String, String>>();
-            	
-            	mp = new MainProvider(getActivity());
-            	mp.open();
-            	result = mp.fetchAllQuestion();
-            	while(result.moveToNext()){
-            		HashMap<String, String> value = new HashMap<String, String>();            	
-                	value.put(KEY_QUESTION, result.getString(1));
-                	value.put(KEY_PERSENT, result.getString(3) + "/" + result.getString(2));
-                	
-                	switch(result.getInt(4))
-                	{
-                	case 0:
-                		state = "기초학습";
-                		break;
-                	default:
-                		state = "기초학습";
-                	}
-                	value.put(KEY_STATE, state);
-                	
-                	questionList.add(value);
-        		}
-            	mp.close();
-            	
-            	qAdapter = new QuestionAdapter(getActivity(), questionList);
-            	qList.setAdapter(qAdapter);
+            	createMenuMY(inflater, container);                
             	break;
             case 2:
             	rootView = inflater.inflate(R.layout.question_list, container, false);
@@ -175,12 +193,22 @@ public class LearnListActivity extends Activity{
             case 5:
             	rootView = inflater.inflate(R.layout.setting, container, false);
             	swc = (Switch)rootView.findViewById(R.id.switch_lock_screen); 
+            	if(lockScreenService != null)
+            		swc.setChecked(true);
+           		else
+           			swc.setChecked(false);
+            	
             	swc.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener(){
             		public void onCheckedChanged(CompoundButton buttonView, boolean isChecked){
             			if(isChecked){
-            				getActivity().startService(new Intent(getActivity(), LockScreenService.class));
+            				lockScreenService = getActivity().startService(new Intent(getActivity(), LockScreenService.class));
+            				//getActivity().startService(new Intent(getActivity(), LockScreenService.class));
             			} else{
-            				getActivity().stopService(new Intent(getActivity(), LockScreenService.class));
+            				//getActivity().stopService(new Intent(getActivity(), LockScreenService.class));
+            				Intent i = new Intent();
+            				i.setComponent(lockScreenService);
+            				getActivity().stopService(i);
+            				lockScreenService = null;
             			}
             		}            		
             	});
@@ -214,6 +242,7 @@ public class LearnListActivity extends Activity{
             	break;
            	default:
            		rootView = inflater.inflate(R.layout.fragment_menu, container, false);
+           		
             }
             return rootView;
         }
@@ -230,6 +259,7 @@ public class LearnListActivity extends Activity{
 			else
 				return null;
 		}
+		
 		
 		@Override
 		public void onLoadFinished(Loader<JSONObject> loader, JSONObject json) {
@@ -257,6 +287,127 @@ public class LearnListActivity extends Activity{
 			// TODO Auto-generated method stub
 			
 		}
+    
+		public void createMenuMY(LayoutInflater inflater, ViewGroup container){
+	    	String state;
+	    	Cursor result;
+	    	
+			rootView = inflater.inflate(R.layout.question_list, container, false);
+        	qList = (ListView)rootView.findViewById(R.id.list);
+        	mSearchView = (SearchView)rootView.findViewById(R.id.search_view);
+        	questionList = new ArrayList<HashMap<String, String>>();
+        	
+        	mp = new MainProvider(getActivity());
+        	mp.open();
+        	result = mp.fetchAllQuestion();
+        	while(result.moveToNext()){
+        		HashMap<String, String> value = new HashMap<String, String>();            	
+            	value.put(KEY_QUESTION, result.getString(1));
+            	value.put(KEY_PERSENT, result.getString(3) + "/" + result.getString(2));
+            	
+            	switch(result.getInt(4))
+            	{
+            	case 0:
+            		state = "기초학습";
+            		break;
+            	default:
+            		state = "기초학습";
+            	}
+            	value.put(KEY_STATE, state);
+            	
+            	questionList.add(value);
+    		}
+        	mp.close();
+        	
+        	qAdapter = new QuestionAdapter(getActivity(), questionList);
+        	qList.setAdapter(qAdapter);
+        	qList.setTextFilterEnabled(true);
+        	setupSearchView();
+        	
+        	mWindowManager = (WindowManager)getActivity().getSystemService(Context.WINDOW_SERVICE);
+        	
+        	qList.setOnScrollListener(osl);
+            
+            LayoutInflater inflate = (LayoutInflater)getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            
+            mDialogText = (TextView) inflate.inflate(R.layout.list_position, null);
+            mDialogText.setVisibility(View.INVISIBLE);
+            
+            mHandler.post(new Runnable() {
+
+                public void run() {
+                    mReady = true;
+                    WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
+                            LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT,
+                            WindowManager.LayoutParams.TYPE_APPLICATION,
+                            WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
+                                    | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                            PixelFormat.TRANSLUCENT);
+                    mWindowManager.addView(mDialogText, lp);
+                }
+            });
+		}
+		
+		private OnScrollListener osl = new OnScrollListener() {
+			
+			@Override
+			public void onScrollStateChanged(AbsListView view, int scrollState) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void onScroll(AbsListView view, int firstVisibleItem,
+		            int visibleItemCount, int totalItemCount) {
+		        if (mReady) {
+		            char firstLetter = questionList.get(firstVisibleItem).get(KEY_QUESTION).charAt(0);
+		            
+		            if (!mShowing && firstLetter != mPrevLetter) {
+
+		                mShowing = true;
+		                mDialogText.setVisibility(View.VISIBLE);
+		            }
+		            mDialogText.setText(((Character)firstLetter).toString());
+		            mHandler.removeCallbacks(mRemoveWindow);
+		            mHandler.postDelayed(mRemoveWindow, 500);
+		            mPrevLetter = firstLetter;
+		        }
+		    }
+		};
+
+		private void removeWindow() {
+	        if (mShowing) {
+	            mShowing = false;
+	            mDialogText.setVisibility(View.INVISIBLE);
+	        }
+	    }
+    
+		private void setupSearchView() {
+	        mSearchView.setIconifiedByDefault(false);
+	        mSearchView.setOnQueryTextListener(qtl);
+	        mSearchView.setSubmitButtonEnabled(false);
+	    }
+		
+		private OnQueryTextListener qtl = new OnQueryTextListener() {
+			
+			@Override
+		    public boolean onQueryTextChange(String newText) {
+				
+		        if (TextUtils.isEmpty(newText)) {
+		        	qList.clearTextFilter();
+		        } else {
+		        	//qList.setFilterText(newText.toString());
+		        	Log.e("search", newText.toString() );
+		        	Log.e("search", "Count : " + qList.getCount() );
+		        }
+		        return true;
+		    }
+			
+			@Override
+		    public boolean onQueryTextSubmit(String query) {
+		        return false;
+		    }
+		};
     }
 
     public static class GetServerData extends AsyncTaskLoader<JSONObject>{

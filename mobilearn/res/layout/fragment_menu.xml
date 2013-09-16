@@ -41,13 +41,13 @@
         </LinearLayout>
 		
         <TextView
-            android:id="@+id/textView2"
+            android:id="@+id/service_state"
             android:layout_width="0px"
             android:layout_height="match_parent"
             android:layout_weight="0.50"
             android:gravity="center"
-            android:textSize="60dip"
-            android:text="OFF" 
+            android:textSize="90dip"
+            android:text="" 
             android:textColor="#fff"
             android:background="#7e1420"/>
 
@@ -80,7 +80,7 @@
 	                android:text="005"
 	                android:textColor="#fff"
 	                android:includeFontPadding="false"
-	                android:textSize="35dip" />
+	                android:textSize="40dip" />
 	            
 	            <TextView
 	                android:id="@+id/textView1"
@@ -110,7 +110,7 @@
 	                android:text="278"
 	                android:textColor="#fff"
 	                android:includeFontPadding="false"
-	                android:textSize="35dip" />
+	                android:textSize="40dip" />
 	            
 	            <TextView
 	                android:id="@+id/textView1"
@@ -149,5 +149,6 @@
         android:layout_height="0dp"
         android:layout_weight="0.3"
         android:background="#1b2069" >
+        
     </LinearLayout>
 </LinearLayout>

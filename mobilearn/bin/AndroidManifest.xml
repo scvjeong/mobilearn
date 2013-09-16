@@ -30,7 +30,11 @@
         </activity>
         <activity android:name="MainActivity"></activity>
         <activity android:name="SimpleServiceActivity"></activity>
-    	<service android:name="LockScreenService"></service>
+    	<service android:name=".LockScreenService">
+    	    <intent-filter>
+                <action android:name="com.example.mobilearn.action.CHECK_ALIVE" />
+            </intent-filter>
+    	</service>
     </application>
 
 </manifest>

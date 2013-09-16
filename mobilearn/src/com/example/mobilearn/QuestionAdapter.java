@@ -5,6 +5,9 @@ import java.util.HashMap;
 
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.Color;
+import android.graphics.drawable.Drawable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -59,6 +62,8 @@ public class QuestionAdapter extends BaseAdapter{
 		persent.setText(question.get(LearnListActivity.KEY_PERSENT));
 		state.setText(question.get(LearnListActivity.KEY_STATE));
 		
+		//vi.setBackgroundColor((position & 1) == 1 ? Color.WHITE : Color.rgb(172,172,172) );
+
 		return vi;
 	}
 	
