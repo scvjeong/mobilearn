@@ -17,6 +17,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
+import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.os.Bundle;
 import android.os.Handler;
@@ -25,6 +26,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -36,6 +38,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CompoundButton;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.SearchView.OnQueryTextListener;
@@ -82,6 +85,8 @@ public class LearnListActivity extends Activity{
         mDrawerList.setAdapter(new ArrayAdapter<String>(this,
                 R.layout.menu_list_item, mList));
         mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
+        
+        lockScreenService = startService(new Intent(this, LockScreenService.class));
         selectItem(0);
     }
     
@@ -111,6 +116,7 @@ public class LearnListActivity extends Activity{
         // update selected item and title, then close the drawer
         mDrawerList.setItemChecked(position, true);
         setTitle(mList[position]);
+        setTitleBackground(position);
         mDrawerLayout.closeDrawer(mDrawerList);
     }
     
@@ -120,6 +126,22 @@ public class LearnListActivity extends Activity{
         mtitle.setText(title);
     }
 
+	public void setTitleBackground(int position) {
+		LinearLayout titleBackground = (LinearLayout)findViewById(R.id.title_bg);
+		switch(position)
+		{
+		case 0:
+			titleBackground.setBackgroundColor(Color.rgb(76, 162, 141));
+			break;
+		case 1:
+			titleBackground.setBackgroundColor(Color.rgb(233, 143, 14));
+			break;
+		case 5:
+			titleBackground.setBackgroundColor(Color.rgb(67, 67, 67));
+			break;
+		}
+    }
+		
     public static class ContentFragment extends Fragment implements LoaderCallbacks<JSONObject>{
     	
     	private ArrayList<HashMap<String, String>> questionList = new ArrayList<HashMap<String, String>>();
@@ -158,7 +180,7 @@ public class LearnListActivity extends Activity{
         	int i = getArguments().getInt(ARG_PLANET_NUMBER);
             Cursor result;
             Bundle args;
-            String url, state;
+            String url;
             
             switch(i){
             case 0:
@@ -170,7 +192,7 @@ public class LearnListActivity extends Activity{
            			serviceState.setText("OFF");
            		break;
             case 1:
-            	createMenuMY(inflater, container);                
+            	createMenuMY(inflater, container);
             	break;
             case 2:
             	rootView = inflater.inflate(R.layout.question_list, container, false);
@@ -191,27 +213,7 @@ public class LearnListActivity extends Activity{
             	qList.setAdapter(qAdapter);
             	break;
             case 5:
-            	rootView = inflater.inflate(R.layout.setting, container, false);
-            	swc = (Switch)rootView.findViewById(R.id.switch_lock_screen); 
-            	if(lockScreenService != null)
-            		swc.setChecked(true);
-           		else
-           			swc.setChecked(false);
-            	
-            	swc.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener(){
-            		public void onCheckedChanged(CompoundButton buttonView, boolean isChecked){
-            			if(isChecked){
-            				lockScreenService = getActivity().startService(new Intent(getActivity(), LockScreenService.class));
-            				//getActivity().startService(new Intent(getActivity(), LockScreenService.class));
-            			} else{
-            				//getActivity().stopService(new Intent(getActivity(), LockScreenService.class));
-            				Intent i = new Intent();
-            				i.setComponent(lockScreenService);
-            				getActivity().stopService(i);
-            				lockScreenService = null;
-            			}
-            		}            		
-            	});
+            	createMenuSetting(inflater, container);
             	break;
             case 6:
             	args = new Bundle();
@@ -287,7 +289,7 @@ public class LearnListActivity extends Activity{
 			// TODO Auto-generated method stub
 			
 		}
-    
+
 		public void createMenuMY(LayoutInflater inflater, ViewGroup container){
 	    	String state;
 	    	Cursor result;
@@ -296,7 +298,7 @@ public class LearnListActivity extends Activity{
         	qList = (ListView)rootView.findViewById(R.id.list);
         	mSearchView = (SearchView)rootView.findViewById(R.id.search_view);
         	questionList = new ArrayList<HashMap<String, String>>();
-        	
+       	
         	mp = new MainProvider(getActivity());
         	mp.open();
         	result = mp.fetchAllQuestion();
@@ -348,6 +350,130 @@ public class LearnListActivity extends Activity{
             });
 		}
 		
+		TouchListenerClass touchListener = new TouchListenerClass();
+		
+		class TouchListenerClass implements View.OnTouchListener {
+			@Override
+			public boolean onTouch(View v, MotionEvent event) {
+				// TODO Auto-generated method stub
+				if(event.getAction() == MotionEvent.ACTION_DOWN) {
+					((TextView)v).setBackgroundColor(Color.rgb(166, 156, 142));
+					((TextView)v).setBackgroundColor(Color.rgb(255, 255, 255));
+					return true;
+				} 
+				return false;
+			} 
+	    }
+		
+		public void createMenuSetting(LayoutInflater inflater, ViewGroup container){
+			
+			Cursor result;
+			rootView = inflater.inflate(R.layout.setting, container, false);
+			TextView sls = (TextView)rootView.findViewById(R.id.setting_lock_screen);
+			TextView sv = (TextView)rootView.findViewById(R.id.setting_vibration);
+			TextView t1 = (TextView)rootView.findViewById(R.id.time_1);
+			TextView t2 = (TextView)rootView.findViewById(R.id.time_2);
+			TextView t3 = (TextView)rootView.findViewById(R.id.time_3);
+			TextView t4 = (TextView)rootView.findViewById(R.id.time_4);
+			TextView t5 = (TextView)rootView.findViewById(R.id.time_5);
+			TextView t6 = (TextView)rootView.findViewById(R.id.time_6);
+			TextView t7 = (TextView)rootView.findViewById(R.id.time_7);
+			TextView t8 = (TextView)rootView.findViewById(R.id.time_8);
+			TextView t9 = (TextView)rootView.findViewById(R.id.time_9);
+			TextView t10 = (TextView)rootView.findViewById(R.id.time_10);
+			TextView t11 = (TextView)rootView.findViewById(R.id.time_11);
+			TextView t12 = (TextView)rootView.findViewById(R.id.time_12);
+			
+			t1.setOnTouchListener(touchListener);
+			t2.setOnTouchListener(touchListener);
+			t3.setOnTouchListener(touchListener);
+			t4.setOnTouchListener(touchListener);
+			t5.setOnTouchListener(touchListener);
+			t6.setOnTouchListener(touchListener);
+			t7.setOnTouchListener(touchListener);
+			t8.setOnTouchListener(touchListener);
+			t9.setOnTouchListener(touchListener);
+			t10.setOnTouchListener(touchListener);
+			t11.setOnTouchListener(touchListener);
+			t12.setOnTouchListener(touchListener);
+			
+			mp = new MainProvider(getActivity());
+        	mp.open();
+        	
+        	result = mp.fetchSetting("lock_screen");
+        	if(result.getCount() < 1) {
+        		mp.insertSetting("lock_screen", "ON");
+        		lockScreenService = getActivity().startService(new Intent(getActivity(), LockScreenService.class));
+        		sls.setText("ON");
+        	}
+        	if(lockScreenService != null) {
+        		sls.setText("ON");
+        		mp.updateSettingItem("lock_screen", "ON");
+        	} else {
+       			sls.setText("OFF");
+       			mp.updateSettingItem("lock_screen", "OFF");
+        	}
+       		
+        	result = mp.fetchSetting("vibration");
+        	if(result.getCount() < 1) {
+        		mp.insertSetting("vibration", "ON");
+        		sv.setText("ON");
+        	}
+        	else if(result.move(0)) {
+        		String value = result.getString(0);
+        		if(value.equals("ON")){
+        			mp.updateSettingItem("vibration", "ON");
+            		sv.setText("ON");
+        		}
+        		else{
+        			mp.updateSettingItem("vibration", "OFF");
+    				sv.setText("OFF");
+        		}
+        	}
+        	mp.close();
+        	
+        	sls.setOnClickListener(new View.OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					// TODO Auto-generated method stub
+					mp.open();
+					String s = ((TextView)v).getText().toString();
+					if(s == "OFF"){
+        				lockScreenService = getActivity().startService(new Intent(getActivity(), LockScreenService.class));
+        				mp.updateSettingItem("lock_screen", "ON");
+        				((TextView)v).setText("ON");
+        				//getActivity().startService(new Intent(getActivity(), LockScreenService.class));
+        			} else{
+        				//getActivity().stopService(new Intent(getActivity(), LockScreenService.class));
+        				Intent i = new Intent();
+        				i.setComponent(lockScreenService);
+        				getActivity().stopService(i);
+        				lockScreenService = null;
+        				mp.updateSettingItem("lock_screen", "OFF");
+        				((TextView)v).setText("OFF");
+        			}
+					mp.close();
+				}
+			});
+        	
+        	sv.setOnClickListener(new View.OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					// TODO Auto-generated method stub
+					mp.open();
+					String s = ((TextView)v).getText().toString();
+					if(s == "OFF"){
+        				mp.updateSettingItem("vibration", "ON");
+        				((TextView)v).setText("ON");
+        			} else{
+        				mp.updateSettingItem("vibration", "OFF");
+        				((TextView)v).setText("OFF");
+        			}
+					mp.close();
+				}
+			});
+		}
+		
 		private OnScrollListener osl = new OnScrollListener() {
 			
 			@Override
@@ -396,9 +522,7 @@ public class LearnListActivity extends Activity{
 		        if (TextUtils.isEmpty(newText)) {
 		        	qList.clearTextFilter();
 		        } else {
-		        	//qList.setFilterText(newText.toString());
-		        	Log.e("search", newText.toString() );
-		        	Log.e("search", "Count : " + qList.getCount() );
+		        	qList.setFilterText(newText.toString());
 		        }
 		        return true;
 		    }

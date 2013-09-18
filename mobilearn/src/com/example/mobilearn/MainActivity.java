@@ -3,6 +3,7 @@ package com.example.mobilearn;
 import java.util.Random;
 
 import android.os.Bundle;
+import android.os.Vibrator;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
@@ -13,6 +14,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.app.Activity;
+import android.content.Context;
 import android.database.Cursor;
 
 public class MainActivity extends Activity implements OnClickListener{
@@ -28,6 +30,7 @@ public class MainActivity extends Activity implements OnClickListener{
 	private int answerNum;
 	private boolean is_first = true;
 	private long oid_question;
+	private Vibrator vibrator = null;
 
 	/*
 	@Override
@@ -43,6 +46,8 @@ public class MainActivity extends Activity implements OnClickListener{
 		// TODO Auto-generated method stub
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.screen_main);
+		
+		vibrator = (Vibrator)getSystemService(Context.VIBRATOR_SERVICE);
 		
         mp = new MainProvider(this);
         mp.open();
@@ -130,71 +135,30 @@ public class MainActivity extends Activity implements OnClickListener{
 	
 	public boolean makingAnswerClickListener(int id)
 	{
+		mp.open();
 		boolean ca = false;
 		if( id == this.answerNum ) {
 			Toast.makeText(this, "correct", Toast.LENGTH_SHORT).show();
 			ca = true;
 			if(this.is_first) {
-				mp.open();
 				mp.updateCorrectQuestion(this.oid_question);
-				mp.close();
 			}
 		} else {
-			Toast.makeText(this, "incorrect", Toast.LENGTH_SHORT).show();
+			long pattern[] = new long[] {0, 200, 100, 200};
+			Cursor result = mp.fetchSetting("vibration");
+			if(result.getCount() < 1)
+				vibrator.vibrate(pattern, -1);
+			else if(result.move(0)) {
+        		String value = result.getString(0);
+        		if(value.equals("ON"))
+        			vibrator.vibrate(pattern, -1);
+        		else
+        			vibrator = null;
+        	}	
 		}
 		this.is_first= false;
-		/*
-		switch(id){
-		case R.id.answer1:
-			if( ca_num == 1 ) {
-				Toast.makeText(this, "correct", Toast.LENGTH_SHORT).show();
-				ca = true;
-			}
-			else
-				Toast.makeText(this, "incorrect", Toast.LENGTH_SHORT).show();
-			break;
-		case R.id.answer2:
-			if( ca_num == 2 ) {
-				Toast.makeText(this, "correct", Toast.LENGTH_SHORT).show();
-				ca = true;
-			}
-			else
-				Toast.makeText(this, "incorrect", Toast.LENGTH_SHORT).show();
-			break;
-		case R.id.answer3:
-			if( ca_num == 3 ) {
-				Toast.makeText(this, "correct", Toast.LENGTH_SHORT).show();
-				ca = true;
-			}
-			else
-				Toast.makeText(this, "incorrect", Toast.LENGTH_SHORT).show();
-			break;
-		case R.id.answer4:
-			if( ca_num == 4 ) {
-				Toast.makeText(this, "correct", Toast.LENGTH_SHORT).show();
-				ca = true;
-			}
-			else
-				Toast.makeText(this, "incorrect", Toast.LENGTH_SHORT).show();
-			break;
-		case R.id.answer5:
-			if( ca_num == 5 ) {
-				Toast.makeText(this, "correct", Toast.LENGTH_SHORT).show();
-				ca = true;
-			}
-			else
-				Toast.makeText(this, "incorrect", Toast.LENGTH_SHORT).show();
-			break;
-		case R.id.answer6:
-			if( ca_num == 6 ) {
-				Toast.makeText(this, "correct", Toast.LENGTH_SHORT).show();
-				ca = true;
-			}
-			else
-				Toast.makeText(this, "incorrect", Toast.LENGTH_SHORT).show();
-			break;
-		}
-		*/
+		mp.close();
+		
 		return ca;
 	}
 	/*

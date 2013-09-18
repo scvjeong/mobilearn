@@ -23,6 +23,8 @@ public class MainProvider {
     public static final String KEY_OID_QUESTION = "oid_question";
     public static final String KEY_CORRECT_ANSWER_CNT = "correct_answer_cnt";
     public static final String KEY_STATE = "state";
+    public static final String KEY_ITEM = "item";
+    public static final String KEY_VALUE = "value";
     
     private static final String TAG = "MainProvider";
  
@@ -33,19 +35,22 @@ public class MainProvider {
      *
      * Database creation sql statement
      */
-    private static final String TABLE_ANSWER_CREATE = "create table answers (oid integer primary key, "
+    private static final String TABLE_ANSWER_CREATE = "create table answers (oid integer primary key not null, "
             + "reply text not null, answer integer not null, oid_question integer not null );";
-    private static final String TABLE_QUESTION_CREATE = "create table questions (oid integer primary key, "
+    private static final String TABLE_QUESTION_CREATE = "create table questions (oid integer primary key not null, "
             + "question text not null, oid_library integer not null, count integer default 0, "
     		+ "correct_answer_cnt integer default 0, state integer default 0);";
-    private static final String TABLE_LIBRARY_CREATE = "create table library (oid integer primary key, "
+    private static final String TABLE_LIBRARY_CREATE = "create table library (oid integer primary key not null, "
     		+ "name text not null, type integer not null, update_date text not null, "
     		+ "is_use integer not null);";
+    private static final String TABLE_SETTING_CREATE = "create table setting (oid integer primary key autoincrement not null, "
+            + "item text not null, value text not null );";
  
     private static final String DATABASE_NAME = "mobilearn";
     private static final String TABLE_QUESTION = "questions";
     private static final String TABLE_LIBRARY = "library";
     private static final String TABLE_ANSWER = "answers";
+    private static final String TABLE_SETTING = "setting";
     private static final int DATABASE_VERSION = 2;
     private final Context mCtx;
  
@@ -60,22 +65,25 @@ public class MainProvider {
         	db.execSQL(TABLE_ANSWER_CREATE);
             db.execSQL(TABLE_QUESTION_CREATE);
             db.execSQL(TABLE_LIBRARY_CREATE);
+            db.execSQL(TABLE_SETTING_CREATE);
         }
  
         @Override
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
             Log.w(TAG, "Upgrading database from version " + oldVersion + " to " + newVersion
                     + ", which will destroy all old data");
-            db.execSQL("DROP TABLE IF EXISTS answers");
-            db.execSQL("DROP TABLE IF EXISTS library");
-            db.execSQL("DROP TABLE IF EXISTS questions");
+            db.execSQL("DROP TABLE IF EXISTS " + TABLE_ANSWER);
+            db.execSQL("DROP TABLE IF EXISTS " + TABLE_LIBRARY);
+            db.execSQL("DROP TABLE IF EXISTS " + TABLE_QUESTION);
+            db.execSQL("DROP TABLE IF EXISTS " + TABLE_SETTING);
             onCreate(db);
         }
         
         public void init(SQLiteDatabase db) {
-        	db.execSQL("DROP TABLE IF EXISTS answers");
-        	db.execSQL("DROP TABLE IF EXISTS library");
-            db.execSQL("DROP TABLE IF EXISTS questions");
+        	db.execSQL("DROP TABLE IF EXISTS " + TABLE_ANSWER);
+            db.execSQL("DROP TABLE IF EXISTS " + TABLE_LIBRARY);
+            db.execSQL("DROP TABLE IF EXISTS " + TABLE_QUESTION);
+            db.execSQL("DROP TABLE IF EXISTS " + TABLE_SETTING);
             onCreate(db);
         }
     }
@@ -233,5 +241,30 @@ public class MainProvider {
             mCursor.moveToFirst();
         }
         return mCursor;
+    }
+    
+    public long insertSetting(String item, String value) {
+        ContentValues initialValues = new ContentValues();
+        initialValues.put(KEY_ITEM, item);
+        initialValues.put(KEY_VALUE, value);
+        return mDb.insert(TABLE_SETTING, null, initialValues);
+    }
+ 
+    public boolean deleteSetting(String item) {
+        return mDb.delete(TABLE_SETTING, KEY_ITEM + "= '" + item + "'", null) > 0;
+    }
+ 
+    public Cursor fetchSetting(String item) throws SQLException {
+        Cursor mCursor = mDb.query(true, TABLE_SETTING, new String[] { KEY_VALUE }, KEY_ITEM
+                + "= '" + item + "'", null, null, null, null, null);
+        if (mCursor != null) {
+            mCursor.moveToFirst();
+        }
+        return mCursor;
+    }
+    public boolean updateSettingItem(String item, String value) {
+        ContentValues args = new ContentValues();
+        args.put(KEY_VALUE, value);
+        return mDb.update(TABLE_SETTING, args, KEY_ITEM + "= '" + item + "'", null) > 0;
     }
 }

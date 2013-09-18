@@ -30,8 +30,8 @@ public class LockScreenService extends Service {
             String action = intent.getAction();
 			if(action.equals("android.intent.action.SCREEN_OFF")){
             	Intent i = new Intent(context, MainActivity.class);
-            	i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK );
-            	//i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            	//i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK );
+            	i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
             	context.startActivity(i);
             }
 			/*
