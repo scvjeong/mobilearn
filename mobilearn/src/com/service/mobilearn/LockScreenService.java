@@ -3,7 +3,7 @@ package com.service.mobilearn;
 import java.util.Iterator;
 import java.util.List;
 
-import com.Activity.mobilearn.LockScreenActivity;
+import com.activity.mobilearn.LockScreenActivity;
 
 import android.app.Activity;
 import android.app.ActivityManager;

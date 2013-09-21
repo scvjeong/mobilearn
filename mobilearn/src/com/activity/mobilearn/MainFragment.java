@@ -1,4 +1,4 @@
-package com.Activity.mobilearn;
+package com.activity.mobilearn;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -7,6 +7,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.Fragment;
+import android.app.FragmentManager;
 import android.app.LoaderManager.LoaderCallbacks;
 import android.content.ComponentName;
 import android.content.Context;
@@ -19,6 +20,8 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v4.view.PagerAdapter;
+import android.support.v4.view.ViewPager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -40,8 +43,6 @@ import com.service.mobilearn.LockScreenService;
 
 public class MainFragment extends Fragment implements LoaderCallbacks<JSONObject>{
 	
-	private static ComponentName lockScreenService = null;
-	
 	private ArrayList<HashMap<String, String>> questionList = new ArrayList<HashMap<String, String>>();
 	private ArrayList<HashMap<String, String>> libraryList = new ArrayList<HashMap<String, String>>();
 	private ArrayList<HashMap<String, String>> marketList = new ArrayList<HashMap<String, String>>();
@@ -54,6 +55,12 @@ public class MainFragment extends Fragment implements LoaderCallbacks<JSONObject
 	private MainProvider mp;
 	private Switch swc;
 	private View rootView;
+	private ViewPager mPager;
+	private PagerAdapter mPagerAdapter;
+	
+	public static final String MENU_NUMBER = "menu_number";
+	public static final int NUM_PAGES = 5;	
+	private static final OnQueryTextListener OnQueryTextListener = null;
 	
     static final String KEY_MARKET_NAME = "market_name";
     static final String KEY_LIBRARY_NAME = "library_name";
@@ -76,9 +83,6 @@ public class MainFragment extends Fragment implements LoaderCallbacks<JSONObject
     private boolean mReady;
     private char mPrevLetter = Character.MIN_VALUE;
     private SearchView mSearchView;
-	
-    public static final String MENU_NUMBER = "menu_number";
-	private static final OnQueryTextListener OnQueryTextListener = null;
 
     public MainFragment() {
         // Empty constructor required for fragment subclasses
@@ -97,7 +101,7 @@ public class MainFragment extends Fragment implements LoaderCallbacks<JSONObject
         case 0:
        		rootView = inflater.inflate(R.layout.fragment_menu, container, false);
        		TextView serviceState = (TextView)rootView.findViewById(R.id.service_state);
-       		if(lockScreenService != null)
+       		if(MainActivity.lockScreenService != null)
        			serviceState.setText("ON");
        		else
        			serviceState.setText("OFF");
@@ -302,7 +306,6 @@ public class MainFragment extends Fragment implements LoaderCallbacks<JSONObject
 	
 	public void createMenuMarket(LayoutInflater inflater, ViewGroup container){
     	
-    	
     	if( !isOnline() ){
     		rootView = inflater.inflate(R.layout.no_connection, container, false);
     		
@@ -310,15 +313,24 @@ public class MainFragment extends Fragment implements LoaderCallbacks<JSONObject
     		String state;
 	    	Cursor result;
 			rootView = inflater.inflate(R.layout.market, container, false);
-			mList = (ListView)rootView.findViewById(R.id.list);
-        	mSearchView = (SearchView)rootView.findViewById(R.id.search_view);
-        	marketList = new ArrayList<HashMap<String, String>>();
+			
+            // Instantiate a ViewPager and a PagerAdapter.
+            mPager = (ViewPager) rootView.findViewById(R.id.market_pager);
+            mPagerAdapter = new MarketPagerAdapter(getFragmentManager());
+            mPager.setAdapter(mPagerAdapter);
+            mPager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
+                @Override
+                public void onPageSelected(int position) {
+                    //invalidateOptionsMenu();
+                }
+            });        	
     	}
-    	
-    	
-    	//LinearLayout noConnection = new LinearLayout(getActivity());
-    	
+   	
     	/*
+ 
+		mList = (ListView)rootView.findViewById(R.id.list);
+		mSearchView = (SearchView)rootView.findViewById(R.id.search_view);
+		marketList = new ArrayList<HashMap<String, String>>();
     	mp = new MainProvider(getActivity());
     	mp.open();
     	result = mp.fetchAllLibrary();
@@ -424,11 +436,12 @@ public class MainFragment extends Fragment implements LoaderCallbacks<JSONObject
     	result = mp.fetchSetting("lock_screen");
     	if(result.getCount() < 1) {
     		mp.insertSetting("lock_screen", "ON");
-    		lockScreenService = getActivity().startService(new Intent(getActivity(), LockScreenService.class));
+    		MainActivity.lockScreenService = getActivity().startService(new Intent(getActivity(), LockScreenService.class));
     		//lockScreenService = getActivity().startService(new Intent(getActivity(), LoadingService.class));
     		sls.setText("ON");
     	}
-    	if(lockScreenService != null) {
+    	
+    	if(MainActivity.lockScreenService != null) {
     		sls.setText("ON");
     		mp.updateSettingItem("lock_screen", "ON");
     	} else {
@@ -461,7 +474,7 @@ public class MainFragment extends Fragment implements LoaderCallbacks<JSONObject
 				mp.open();
 				String s = ((TextView)v).getText().toString();
 				if(s == "OFF"){
-    				lockScreenService = getActivity().startService(new Intent(getActivity(), LockScreenService.class));
+					MainActivity.lockScreenService = getActivity().startService(new Intent(getActivity(), LockScreenService.class));
 					//lockScreenService = getActivity().startService(new Intent(getActivity(), LoadingService.class));
     				mp.updateSettingItem("lock_screen", "ON");
     				((TextView)v).setText("ON");
@@ -469,9 +482,9 @@ public class MainFragment extends Fragment implements LoaderCallbacks<JSONObject
     			} else{
     				//getActivity().stopService(new Intent(getActivity(), LockScreenService.class));
     				Intent i = new Intent();
-    				i.setComponent(lockScreenService);
+    				i.setComponent(MainActivity.lockScreenService);
     				getActivity().stopService(i);
-    				lockScreenService = null;
+    				MainActivity.lockScreenService = null;
     				mp.updateSettingItem("lock_screen", "OFF");
     				((TextView)v).setText("OFF");
     			}

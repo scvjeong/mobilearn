@@ -1,4 +1,4 @@
-package com.Activity.mobilearn;
+package com.activity.mobilearn;
 
 import java.util.Random;
 

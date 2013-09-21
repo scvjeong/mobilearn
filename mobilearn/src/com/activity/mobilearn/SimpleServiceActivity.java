@@ -1,4 +1,4 @@
-package com.Activity.mobilearn;
+package com.activity.mobilearn;
 
 import com.example.mobilearn.R;
 import com.service.mobilearn.LockScreenService;

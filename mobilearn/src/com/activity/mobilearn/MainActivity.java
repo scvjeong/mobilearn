@@ -1,4 +1,4 @@
-package com.Activity.mobilearn;
+package com.activity.mobilearn;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -62,7 +62,7 @@ public class MainActivity extends Activity{
     private TextView mtitle;
     private String[] mList;
     
-    private static ComponentName lockScreenService = null;
+    public static ComponentName lockScreenService = null;
     
     LockScreenService lService;
     boolean mBound = false;
