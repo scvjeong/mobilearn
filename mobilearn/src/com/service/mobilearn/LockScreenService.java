@@ -3,7 +3,7 @@ package com.service.mobilearn;
 import java.util.Iterator;
 import java.util.List;
 
-import com.example.mobilearn.MainActivity;
+import com.Activity.mobilearn.LockScreenActivity;
 
 import android.app.Activity;
 import android.app.ActivityManager;
@@ -43,7 +43,7 @@ public class LockScreenService extends Service {
             String action = intent.getAction();
             Log.e("Receive", "action : " + action);
             mCx = context;
-            Intent in = new Intent(context, MainActivity.class);
+            Intent in = new Intent(context, LockScreenActivity.class);
             in.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
             
 			if(action.equals("android.intent.action.SCREEN_OFF")){

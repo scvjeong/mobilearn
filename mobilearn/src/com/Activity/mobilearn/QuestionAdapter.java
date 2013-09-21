@@ -1,7 +1,9 @@
-package com.example.mobilearn;
+package com.Activity.mobilearn;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+
+import com.example.mobilearn.R;
 
 import android.app.Activity;
 import android.content.Context;
@@ -62,9 +64,9 @@ public class QuestionAdapter extends BaseAdapter implements Filterable{
 		HashMap<String, String> question = new HashMap<String, String>();
 		question = data.get(position);
 		
-		title.setText(question.get(LearnListActivity.KEY_QUESTION));
-		persent.setText(question.get(LearnListActivity.KEY_PERSENT));
-		state.setText(question.get(LearnListActivity.KEY_STATE));
+		title.setText(question.get(MainActivity.KEY_QUESTION));
+		persent.setText(question.get(MainActivity.KEY_PERSENT));
+		state.setText(question.get(MainActivity.KEY_STATE));
 		
 		//vi.setBackgroundColor((position & 1) == 1 ? Color.WHITE : Color.rgb(172,172,172) );
 
@@ -99,7 +101,7 @@ public class QuestionAdapter extends BaseAdapter implements Filterable{
 				ArrayList<HashMap<String, String>> nData = new ArrayList<HashMap<String, String>>();
 				
 				for (HashMap<String, String> d : fData) {
-					if(d.get(LearnListActivity.KEY_QUESTION).toUpperCase().startsWith(constraint.toString().toUpperCase()))
+					if(d.get(MainActivity.KEY_QUESTION).toUpperCase().startsWith(constraint.toString().toUpperCase()))
 						nData.add(d);
 				}
 

@@ -1,7 +1,8 @@
-package com.example.mobilearn;
+package com.Activity.mobilearn;
 
 import java.util.Random;
 
+import com.example.mobilearn.R;
 import com.service.mobilearn.LoadingService;
 
 import android.os.Bundle;
@@ -21,7 +22,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 
-public class MainActivity extends Activity implements OnClickListener{
+public class LockScreenActivity extends Activity implements OnClickListener{
 
 	private MainProvider mp;
 	

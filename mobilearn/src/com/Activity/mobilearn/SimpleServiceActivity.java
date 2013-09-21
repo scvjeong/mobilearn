@@ -1,5 +1,6 @@
-package com.example.mobilearn;
+package com.Activity.mobilearn;
 
+import com.example.mobilearn.R;
 import com.service.mobilearn.LockScreenService;
 
 import android.app.Activity;

@@ -1,4 +1,4 @@
-package com.example.mobilearn;
+package com.Activity.mobilearn;
 
 import android.content.ContentValues;
 import android.content.Context;

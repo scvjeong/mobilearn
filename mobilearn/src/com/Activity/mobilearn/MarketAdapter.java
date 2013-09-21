@@ -1,8 +1,9 @@
-package com.example.mobilearn;
+package com.Activity.mobilearn;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import com.example.mobilearn.R;
 import com.lib.mobilearn.ImageLoader;
 
 import android.app.Activity;
@@ -17,14 +18,14 @@ import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-public class LibraryAdapter extends BaseAdapter implements Filterable{
+public class MarketAdapter extends BaseAdapter implements Filterable{
 	private Activity activity;
 	private ArrayList<HashMap<String, String>> data;
-	private Filter libraryFilter;
+	private Filter marketFilter;
 	private static LayoutInflater inflater=null;
 	public ImageLoader imageLoader; 
 	
-	public LibraryAdapter(Activity a, ArrayList<HashMap<String, String>> d ){
+	public MarketAdapter(Activity a, ArrayList<HashMap<String, String>> d ){
 		activity = a;
 		data = d;
 		inflater = (LayoutInflater)activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -54,15 +55,15 @@ public class LibraryAdapter extends BaseAdapter implements Filterable{
 		// TODO Auto-generated method stub
 		View vi = convertView;
 		if(convertView == null)
-			vi = inflater.inflate(R.layout.library_list_row, null);
-		TextView title = (TextView)vi.findViewById(R.id.title_of_library);
+			vi = inflater.inflate(R.layout.market_list_row, null);
+		TextView title = (TextView)vi.findViewById(R.id.title_of_market);
 		ImageView thumb_image=(ImageView)vi.findViewById(R.id.list_image);
 
 		HashMap<String, String> library = new HashMap<String, String>();
 		library = data.get(position);
 		
-		title.setText(library.get(LearnListActivity.KEY_LIBRARY_NAME));
-		imageLoader.DisplayImage(library.get(LearnListActivity.KEY_THUMB_URL), thumb_image);
+		title.setText(library.get(MainActivity.KEY_MARKET_NAME));
+		imageLoader.DisplayImage(library.get(MainActivity.KEY_THUMB_URL), thumb_image);
 		
 		//vi.setBackgroundColor((position & 1) == 1 ? Color.WHITE : Color.rgb(172,172,172) );
 
@@ -71,13 +72,13 @@ public class LibraryAdapter extends BaseAdapter implements Filterable{
 	
 	@Override
 	public Filter getFilter(){
-		if (libraryFilter == null)
-			libraryFilter = new LibraryFilter();
+		if (marketFilter == null)
+			marketFilter = new MarketFilter();
 	     
-	    return libraryFilter;
+	    return marketFilter;
 	}
 	
-	private class LibraryFilter extends Filter{
+	private class MarketFilter extends Filter{
 		
 		ArrayList<HashMap<String, String>> fData = data;
 		
@@ -96,7 +97,7 @@ public class LibraryAdapter extends BaseAdapter implements Filterable{
 				ArrayList<HashMap<String, String>> nData = new ArrayList<HashMap<String, String>>();
 				
 				for (HashMap<String, String> d : fData) {
-					if(d.get(LearnListActivity.KEY_LIBRARY_NAME).toUpperCase().startsWith(constraint.toString().toUpperCase()))
+					if(d.get(MainActivity.KEY_MARKET_NAME).toUpperCase().startsWith(constraint.toString().toUpperCase()))
 						nData.add(d);
 				}
 
