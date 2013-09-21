@@ -24,6 +24,7 @@ import android.content.Loader;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
+import android.graphics.drawable.ColorDrawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
@@ -33,6 +34,8 @@ import android.support.v4.widget.DrawerLayout;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -59,7 +62,7 @@ public class MainActivity extends Activity{
     private ActionBarDrawerToggle mDrawerToggle;
 
     private CharSequence mDrawerTitle;
-    private TextView mtitle;
+    private CharSequence mTitle;
     private String[] mList;
     
     public static ComponentName lockScreenService = null;
@@ -77,10 +80,9 @@ public class MainActivity extends Activity{
     
     @Override
     public void onCreate(Bundle savedInstanceState) {
-    	Log.d("LearnListActivity", "onCreate start");
         super.onCreate(savedInstanceState);
-        
-        requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
+
+        //requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
         setContentView(R.layout.learn_list);
         
         // title
@@ -103,7 +105,6 @@ public class MainActivity extends Activity{
     	super.onStart();
     }
     
-    /* The click listner for ListView in the navigation drawer */
     private class DrawerItemClickListener implements ListView.OnItemClickListener {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -130,26 +131,36 @@ public class MainActivity extends Activity{
     
     @Override
     public void setTitle(CharSequence title) {
+    	/*
         mtitle = (TextView)findViewById(R.id.title);
         mtitle.setText(title);
+        */
+    	mTitle = title;
+        getActionBar().setTitle(mTitle);
     }
 
 	public void setTitleBackground(int position) {
-		LinearLayout titleBackground = (LinearLayout)findViewById(R.id.title_bg);
 		switch(position)
 		{
 		case 0:
-			titleBackground.setBackgroundColor(Color.rgb(76, 162, 141));
+			getActionBar().setBackgroundDrawable(new ColorDrawable(Color.rgb(76, 162, 141)));
 			break;
 		case 1:
-			titleBackground.setBackgroundColor(Color.rgb(233, 143, 14));
+			getActionBar().setBackgroundDrawable(new ColorDrawable(Color.rgb(233, 143, 14)));
 			break;
 		case 2:
-			titleBackground.setBackgroundColor(Color.rgb(58, 36, 4));
+			getActionBar().setBackgroundDrawable(new ColorDrawable(Color.rgb(58, 36, 4)));
+			break;
+		case 3:
+			getActionBar().setBackgroundDrawable(new ColorDrawable(Color.rgb(126, 20, 32)));
+			break;
+		case 4:
+			getActionBar().setBackgroundDrawable(new ColorDrawable(Color.rgb(172, 172, 172)));
 			break;
 		case 5:
-			titleBackground.setBackgroundColor(Color.rgb(67, 67, 67));
+			getActionBar().setBackgroundDrawable(new ColorDrawable(Color.rgb(67, 67, 67)));
 			break;
 		}
     }
+	
 }

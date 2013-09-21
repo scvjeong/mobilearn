@@ -14,6 +14,7 @@ public class MarketFragment extends Fragment {
     public static final String ARG_PAGE = "page";
 
     private int mPageNumber;
+    private ViewGroup rootView;
 
     public static MarketFragment create(int pageNumber) {
     	MarketFragment fragment = new MarketFragment();
@@ -35,13 +36,17 @@ public class MarketFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
-        // Inflate the layout containing a title and body text.
-        ViewGroup rootView = (ViewGroup) inflater
-                .inflate(R.layout.fragment_screen_slide_page, container, false);
-
-        // Set the title view to show the page number.
-        ((TextView) rootView.findViewById(android.R.id.text1)).setText("STEP");
         
+    	switch(mPageNumber)
+    	{
+    	case 0:
+    		rootView = (ViewGroup) inflater.inflate(R.layout.market_home, container, false);
+    		break;
+    	case 1:
+    		rootView = (ViewGroup) inflater.inflate(R.layout.market_list, container, false);
+    		break;
+    	}
+    	
         return rootView;
     }
 

@@ -15,6 +15,18 @@
     <string name="a6"></string>
     <string name="unlock">탭하여 잠금해제(5)</string>
     
+    <string name="action_home">Home</string>
+    <string name="action_list">List</string>
+    
+    <string name="action_toggle">Toggle indicator</string>
+    <string name="action_add_item">Add item</string>
+    <string name="action_remove_item">Remove item</string>
+    <string name="action_previous">Previous</string>
+    <string name="action_next">Next</string>
+    <string name="action_finish">Finish</string>
+    <string name="action_info">Photo info</string>
+    <string name="action_photo">View photo</string>
+    
     <string-array name="menu_list">
         <item>MAIN</item>
         <item>MY</item>

@@ -1,8 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-	<style name="customTitleTheme" parent="android:Theme.Black">
+	<!--style name="customTitleTheme" parent="android:Theme.Black">
 	    <item name="android:windowTitleSize">40dp</item>
 	    <item name="android:windowTitleBackgroundStyle">@style/WindowTitlebarBackground</item>
 	    <item name="android:activatedBackgroundIndicator">@drawable/menu_selector</item>
-	</style>
+	</style-->
+    <style name="CustomActionBarTheme"
+           parent="@android:style/Theme.Holo">
+        <item name="android:actionBarTabStyle">@style/MyActionBarTabs</item>
+    </style>
+
+    <style name="MyActionBarTabs"
+           parent="@android:style/Widget.Holo.ActionBar.TabView">
+        <!-- tab indicator -->
+        <item name="android:background">@drawable/actionbar_tab_indicator</item>
+    </style>
 </resources>
