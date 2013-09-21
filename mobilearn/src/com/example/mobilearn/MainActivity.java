@@ -2,12 +2,15 @@ package com.example.mobilearn;
 
 import java.util.Random;
 
+import com.service.mobilearn.LoadingService;
+
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -15,6 +18,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 
 public class MainActivity extends Activity implements OnClickListener{
@@ -31,15 +35,6 @@ public class MainActivity extends Activity implements OnClickListener{
 	private boolean is_first = true;
 	private long oid_question;
 	private Vibrator vibrator = null;
-
-	/*
-	@Override
-	public void onAttachedToWindow(){
-		
-		this.getWindow().setType(WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG|WindowManager.LayoutParams.FLAG_FULLSCREEN);
-		super.onAttachedToWindow();
-	}
-	*/
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -97,6 +92,12 @@ public class MainActivity extends Activity implements OnClickListener{
 		date.setText(time);
 		
 		mp.close();
+	}
+	
+	@Override
+	protected void onResume(){
+		super.onResume();
+		sendBroadcast(new Intent("com.service.mobilearn.action.Delete_Loading_Page"));
 	}
 	
 	public void makingAnswer(String answer, int answerNum, String[] reply){
@@ -188,5 +189,16 @@ public class MainActivity extends Activity implements OnClickListener{
 		}
 		return false;
 	}
-			
+	
+	protected void onUserLeaveHint () {
+        super.onUserLeaveHint();
+        sendBroadcast(new Intent("com.service.mobilearn.action.Insert_Loading_Page"));
+	}
+	/*
+	@Override
+	public void onAttachedToWindow(){
+		this.getWindow().setType(WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG|WindowManager.LayoutParams.FLAG_FULLSCREEN);
+		super.onAttachedToWindow();
+	}
+	*/
 }

@@ -7,6 +7,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.lib.mobilearn.JSONParser;
+import com.service.mobilearn.LoadingService;
+import com.service.mobilearn.LockScreenService;
+
 import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
@@ -62,6 +66,9 @@ public class LearnListActivity extends Activity{
     LockScreenService lService;
     boolean mBound = false;
     
+    static final String KEY_MARKET_NAME = "market_name";
+    static final String KEY_LIBRARY_NAME = "library_name";
+    static final String KEY_THUMB_URL = "thumb_url";
     static final String KEY_QUESTION = "question_name";
     static final String KEY_PERSENT = "persent";
     static final String KEY_STATE = "state";
@@ -136,6 +143,9 @@ public class LearnListActivity extends Activity{
 		case 1:
 			titleBackground.setBackgroundColor(Color.rgb(233, 143, 14));
 			break;
+		case 2:
+			titleBackground.setBackgroundColor(Color.rgb(58, 36, 4));
+			break;
 		case 5:
 			titleBackground.setBackgroundColor(Color.rgb(67, 67, 67));
 			break;
@@ -145,8 +155,14 @@ public class LearnListActivity extends Activity{
     public static class ContentFragment extends Fragment implements LoaderCallbacks<JSONObject>{
     	
     	private ArrayList<HashMap<String, String>> questionList = new ArrayList<HashMap<String, String>>();
+    	private ArrayList<HashMap<String, String>> libraryList = new ArrayList<HashMap<String, String>>();
+    	private ArrayList<HashMap<String, String>> marketList = new ArrayList<HashMap<String, String>>();
     	private ListView qList;
+    	private ListView lList;
+    	private ListView mList;
         private QuestionAdapter qAdapter;
+        private LibraryAdapter lAdapter;
+        private MarketAdapter mAdapter;
     	private MainProvider mp;
     	private Switch swc;
     	private View rootView;
@@ -195,22 +211,10 @@ public class LearnListActivity extends Activity{
             	createMenuMY(inflater, container);
             	break;
             case 2:
-            	rootView = inflater.inflate(R.layout.question_list, container, false);
-            	qList = (ListView)rootView.findViewById(R.id.list);
-            	questionList = new ArrayList<HashMap<String, String>>();
-            	
-            	mp = new MainProvider(getActivity());
-            	mp.open();
-            	result = mp.fetchAllLibrary();
-            	while(result.moveToNext()){
-            		HashMap<String, String> value = new HashMap<String, String>();            	
-                	value.put(KEY_QUESTION, result.getString(1));
-                	questionList.add(value);
-        		}
-            	mp.close();
-            	
-            	qAdapter = new QuestionAdapter(getActivity(), questionList);
-            	qList.setAdapter(qAdapter);
+            	createMenuLibrary(inflater, container);
+            	break;
+            case 4:
+            	createMenuMarket(inflater, container);
             	break;
             case 5:
             	createMenuSetting(inflater, container);
@@ -350,6 +354,109 @@ public class LearnListActivity extends Activity{
             });
 		}
 		
+		public void createMenuLibrary(LayoutInflater inflater, ViewGroup container){
+	    	String state;
+	    	Cursor result;
+	    	
+			rootView = inflater.inflate(R.layout.library, container, false);
+        	lList = (ListView)rootView.findViewById(R.id.list);
+        	mSearchView = (SearchView)rootView.findViewById(R.id.search_view);
+        	libraryList = new ArrayList<HashMap<String, String>>();
+       	
+        	mp = new MainProvider(getActivity());
+        	mp.open();
+        	result = mp.fetchAllLibrary();
+        	while(result.moveToNext()){
+        		HashMap<String, String> value = new HashMap<String, String>();
+            	value.put(KEY_LIBRARY_NAME, result.getString(1));
+            	value.put(KEY_THUMB_URL, "http://lyd.kr:3000" + result.getString(3));
+            	libraryList.add(value);
+    		}
+        	mp.close();
+        	
+        	lAdapter = new LibraryAdapter(getActivity(), libraryList);
+        	lList.setAdapter(lAdapter);
+        	lList.setTextFilterEnabled(true);
+        	/*
+        	setupSearchView();
+        	
+        	mWindowManager = (WindowManager)getActivity().getSystemService(Context.WINDOW_SERVICE);
+        	
+        	lList.setOnScrollListener(osl);
+            
+            LayoutInflater inflate = (LayoutInflater)getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            
+            mDialogText = (TextView) inflate.inflate(R.layout.list_position, null);
+            mDialogText.setVisibility(View.INVISIBLE);
+            
+            mHandler.post(new Runnable() {
+
+                public void run() {
+                    mReady = true;
+                    WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
+                            LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT,
+                            WindowManager.LayoutParams.TYPE_APPLICATION,
+                            WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
+                                    | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                            PixelFormat.TRANSLUCENT);
+                    mWindowManager.addView(mDialogText, lp);
+                }
+            });
+            */
+		}
+		
+		public void createMenuMarket(LayoutInflater inflater, ViewGroup container){
+	    	String state;
+	    	Cursor result;
+	    	
+			rootView = inflater.inflate(R.layout.market, container, false);
+			mList = (ListView)rootView.findViewById(R.id.list);
+        	mSearchView = (SearchView)rootView.findViewById(R.id.search_view);
+        	marketList = new ArrayList<HashMap<String, String>>();
+        	/*
+        	mp = new MainProvider(getActivity());
+        	mp.open();
+        	result = mp.fetchAllLibrary();
+        	while(result.moveToNext()){
+        		HashMap<String, String> value = new HashMap<String, String>();
+            	value.put(KEY_MARKET_NAME, result.getString(1));
+            	value.put(KEY_THUMB_URL, "http://lyd.kr:3000" + result.getString(3));
+            	marketList.add(value);
+    		}
+        	mp.close();
+        	
+        	mAdapter = new MarketAdapter(getActivity(), marketList);
+        	mList.setAdapter(mAdapter);
+        	mList.setTextFilterEnabled(true);
+        	*/
+        	/*
+        	setupSearchView();
+        	
+        	mWindowManager = (WindowManager)getActivity().getSystemService(Context.WINDOW_SERVICE);
+        	
+        	lList.setOnScrollListener(osl);
+            
+            LayoutInflater inflate = (LayoutInflater)getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            
+            mDialogText = (TextView) inflate.inflate(R.layout.list_position, null);
+            mDialogText.setVisibility(View.INVISIBLE);
+            
+            mHandler.post(new Runnable() {
+
+                public void run() {
+                    mReady = true;
+                    WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
+                            LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT,
+                            WindowManager.LayoutParams.TYPE_APPLICATION,
+                            WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
+                                    | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                            PixelFormat.TRANSLUCENT);
+                    mWindowManager.addView(mDialogText, lp);
+                }
+            });
+            */
+		}
+		
 		TouchListenerClass touchListener = new TouchListenerClass();
 		
 		class TouchListenerClass implements View.OnTouchListener {
@@ -404,6 +511,7 @@ public class LearnListActivity extends Activity{
         	if(result.getCount() < 1) {
         		mp.insertSetting("lock_screen", "ON");
         		lockScreenService = getActivity().startService(new Intent(getActivity(), LockScreenService.class));
+        		//lockScreenService = getActivity().startService(new Intent(getActivity(), LoadingService.class));
         		sls.setText("ON");
         	}
         	if(lockScreenService != null) {
@@ -440,6 +548,7 @@ public class LearnListActivity extends Activity{
 					String s = ((TextView)v).getText().toString();
 					if(s == "OFF"){
         				lockScreenService = getActivity().startService(new Intent(getActivity(), LockScreenService.class));
+						//lockScreenService = getActivity().startService(new Intent(getActivity(), LoadingService.class));
         				mp.updateSettingItem("lock_screen", "ON");
         				((TextView)v).setText("ON");
         				//getActivity().startService(new Intent(getActivity(), LockScreenService.class));

@@ -1,4 +1,4 @@
-package com.example.mobilearn;
+package com.lib.mobilearn;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
