@@ -15,8 +15,15 @@
     <string name="a6"></string>
     <string name="unlock">탭하여 잠금해제(5)</string>
     
+    <string name="add_playlist">Register New PlayList...</string>
+    <string name="edit_playlist">Edit</string>
+    <string name="del_playlist">Delete</string>
+    <string name="empty_playlist">Empty</string>
+    <string name="complete_playlist">Complete</string>
+    
     <string name="action_home">Home</string>
     <string name="action_list">List</string>
+    <string name="action_playlist">PlayList</string>
     
     <string name="action_toggle">Toggle indicator</string>
     <string name="action_add_item">Add item</string>

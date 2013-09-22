@@ -30,6 +30,7 @@ public class MarketAdapter extends BaseAdapter implements Filterable{
 		data = d;
 		inflater = (LayoutInflater)activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		imageLoader=new ImageLoader(activity.getApplicationContext());
+		Log.e("MarketAdapter","creator");
 	}
 	
 	@Override
@@ -57,13 +58,20 @@ public class MarketAdapter extends BaseAdapter implements Filterable{
 		if(convertView == null)
 			vi = inflater.inflate(R.layout.market_list_row, null);
 		TextView title = (TextView)vi.findViewById(R.id.title_of_market);
+		TextView nickname = (TextView)vi.findViewById(R.id.nickname);
+		TextView price = (TextView)vi.findViewById(R.id.price);
 		ImageView thumb_image=(ImageView)vi.findViewById(R.id.list_image);
 
 		HashMap<String, String> library = new HashMap<String, String>();
 		library = data.get(position);
 		
 		title.setText(library.get(MainActivity.KEY_MARKET_NAME));
-		imageLoader.DisplayImage(library.get(MainActivity.KEY_THUMB_URL), thumb_image);
+		nickname.setText(library.get(MainActivity.KEY_MARKET_OWNER));
+		price.setText("$" + library.get(MainActivity.KEY_MARKET_PRICE));
+		String thumb_url = library.get(MainActivity.KEY_THUMB_URL);
+		if( !thumb_url.equals("null") ) {
+			imageLoader.DisplayImage("http://lyd.kr:3000" + thumb_url, thumb_image);
+		}
 		
 		//vi.setBackgroundColor((position & 1) == 1 ? Color.WHITE : Color.rgb(172,172,172) );
 

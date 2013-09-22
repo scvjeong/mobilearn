@@ -25,6 +25,7 @@ public class MainProvider {
     public static final String KEY_STATE = "state";
     public static final String KEY_ITEM = "item";
     public static final String KEY_VALUE = "value";
+    public static final String KEY_TITLE = "title";
     
     private static final String TAG = "MainProvider";
  
@@ -35,6 +36,10 @@ public class MainProvider {
      *
      * Database creation sql statement
      */
+    private static final String TABLE_PLAYLIST_CREATE = "create table playlists (oid integer primary key not null, "
+            + "title text not null, oid_library integer not null );";
+    private static final String TABLE_PLAYLIST_QUESTION_CREATE = "create table playlists_questions (oid_playlist integer not null, "
+            + "oid_question integer not null );";
     private static final String TABLE_ANSWER_CREATE = "create table answers (oid integer primary key not null, "
             + "reply text not null, answer integer not null, oid_question integer not null );";
     private static final String TABLE_QUESTION_CREATE = "create table questions (oid integer primary key not null, "
@@ -48,6 +53,8 @@ public class MainProvider {
  
     private static final String DATABASE_NAME = "mobilearn";
     private static final String TABLE_QUESTION = "questions";
+    private static final String TABLE_PLAYLIST = "playlists";
+    private static final String TABLE_PLAYLIST_QUESTION = "playlists_questions";
     private static final String TABLE_LIBRARY = "library";
     private static final String TABLE_ANSWER = "answers";
     private static final String TABLE_SETTING = "setting";
@@ -62,6 +69,8 @@ public class MainProvider {
  
         @Override
         public void onCreate(SQLiteDatabase db) {
+        	db.execSQL(TABLE_PLAYLIST_CREATE);
+        	db.execSQL(TABLE_PLAYLIST_QUESTION_CREATE);
         	db.execSQL(TABLE_ANSWER_CREATE);
             db.execSQL(TABLE_QUESTION_CREATE);
             db.execSQL(TABLE_LIBRARY_CREATE);
@@ -72,6 +81,8 @@ public class MainProvider {
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
             Log.w(TAG, "Upgrading database from version " + oldVersion + " to " + newVersion
                     + ", which will destroy all old data");
+            db.execSQL("DROP TABLE IF EXISTS " + TABLE_PLAYLIST);
+            db.execSQL("DROP TABLE IF EXISTS " + TABLE_PLAYLIST_QUESTION);
             db.execSQL("DROP TABLE IF EXISTS " + TABLE_ANSWER);
             db.execSQL("DROP TABLE IF EXISTS " + TABLE_LIBRARY);
             db.execSQL("DROP TABLE IF EXISTS " + TABLE_QUESTION);
@@ -80,6 +91,8 @@ public class MainProvider {
         }
         
         public void init(SQLiteDatabase db) {
+        	db.execSQL("DROP TABLE IF EXISTS " + TABLE_PLAYLIST);
+        	db.execSQL("DROP TABLE IF EXISTS " + TABLE_PLAYLIST_QUESTION);
         	db.execSQL("DROP TABLE IF EXISTS " + TABLE_ANSWER);
             db.execSQL("DROP TABLE IF EXISTS " + TABLE_LIBRARY);
             db.execSQL("DROP TABLE IF EXISTS " + TABLE_QUESTION);
@@ -266,5 +279,16 @@ public class MainProvider {
         ContentValues args = new ContentValues();
         args.put(KEY_VALUE, value);
         return mDb.update(TABLE_SETTING, args, KEY_ITEM + "= '" + item + "'", null) > 0;
+    }
+    
+    public long insertPlayList(String title, int oid_library) {
+        ContentValues initialValues = new ContentValues();
+        initialValues.put(KEY_TITLE, title);
+        initialValues.put(KEY_OID_LIBRARY, oid_library);
+        return mDb.insert(TABLE_PLAYLIST, null, initialValues);
+    }
+    
+    public Cursor fetchAllPlayList() {
+    	return mDb.query(TABLE_PLAYLIST, new String[] { KEY_OID, KEY_TITLE }, null, null, null, null, KEY_OID + " DESC");
     }
 }

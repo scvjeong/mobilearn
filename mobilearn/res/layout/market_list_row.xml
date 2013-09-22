@@ -32,4 +32,22 @@
         android:textSize="20dip"
         android:typeface="sans" />
 
+    <TextView
+        android:id="@+id/nickname"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/title_of_market"
+        android:layout_below="@+id/title_of_market"
+        android:text="TextView" />
+
+    <TextView
+        android:id="@+id/price"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/thumbnail"
+        android:layout_alignParentRight="true"
+        android:textSize="10dp"
+        android:textColor="#acacac"
+        android:text="TextView" />
+
 </RelativeLayout>

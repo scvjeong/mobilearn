@@ -98,6 +98,8 @@ public class ContentsManager {
         }
 	}
 	
+	
+	
 	/*
 	Boolean isUpdateForMyContents = false;
 	if(isUpdateForMyContents) {

@@ -60,11 +60,14 @@ public class MainFragment extends Fragment implements LoaderCallbacks<JSONObject
 	private MainProvider mp;
 	private Switch swc;
 	private View rootView;
+	private ViewPager qPager;
 	private ViewPager mPager;
+	private PagerAdapter qPagerAdapter;
 	private PagerAdapter mPagerAdapter;
 	
 	public static final String MENU_NUMBER = "menu_number";
-	public static final int NUM_PAGES = 2;	
+	public static final int QUESTION_NUM_PAGES = 2;	
+	public static final int NUM_PAGES = 2;
 	private static final OnQueryTextListener OnQueryTextListener = null;
 	
     static final String KEY_MARKET_NAME = "market_name";
@@ -74,21 +77,6 @@ public class MainFragment extends Fragment implements LoaderCallbacks<JSONObject
     static final String KEY_PERSENT = "persent";
     static final String KEY_STATE = "state";	
 	
-	private final class RemoveWindow implements Runnable {
-        public void run() {
-            removeWindow();
-        }
-    }
-	
-	private RemoveWindow mRemoveWindow = new RemoveWindow();
-	Handler mHandler = new Handler();
-	private WindowManager mWindowManager;
-    private TextView mDialogText;
-    private boolean mShowing;
-    private boolean mReady;
-    private char mPrevLetter = Character.MIN_VALUE;
-    private SearchView mSearchView;
-
     public MainFragment() {
         // Empty constructor required for fragment subclasses
     }
@@ -97,7 +85,7 @@ public class MainFragment extends Fragment implements LoaderCallbacks<JSONObject
 	public void onCreate(Bundle savedInstanceState){
     	super.onCreate(savedInstanceState);
     	int i = getArguments().getInt(MENU_NUMBER);
-    	if(i == 4) 
+    	if(i == 1 || i == 4) 
     		setHasOptionsMenu(true);
     }
     
@@ -167,31 +155,42 @@ public class MainFragment extends Fragment implements LoaderCallbacks<JSONObject
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater){
-    	inflater.inflate(R.menu.market, menu);
+    	int i = getArguments().getInt(MENU_NUMBER);
+    	switch(i){
+    	case 1:
+    		inflater.inflate(R.menu.question, menu);
+    		break;
+    	case 4:
+    		inflater.inflate(R.menu.market, menu);
+    		break;
+    	}    	
     	super.onCreateOptionsMenu(menu, inflater);
-
-        //menu.findItem(R.id.action_home).setEnabled(mPager.getCurrentItem() > 0);
     }
     
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                // Navigate "up" the demo structure to the launchpad activity.
-                // See http://developer.android.com/design/patterns/navigation.html for more.
-                //NavUtils.navigateUpTo(this, new Intent(this, MainActivity.class));
+    	int i = getArguments().getInt(MENU_NUMBER);
+    	switch(i){
+    	case 1:
+            switch (item.getItemId()) {
+	        case R.id.action_list:
+                qPager.setCurrentItem(0);
                 return true;
-
-            case R.id.action_home:
+            case R.id.action_playlist:
+            	qPager.setCurrentItem(1);
+                return true;
+	        }    		break;
+    	case 4:
+            switch (item.getItemId()) {
+	        case R.id.action_home:
                 mPager.setCurrentItem(0);
                 return true;
-
             case R.id.action_list:
             	mPager.setCurrentItem(1);
-                //mPager.setCurrentItem(mPager.getCurrentItem() + 1);
                 return true;
-        }
-
+	        }
+    		break;
+    	}    	
         return super.onOptionsItemSelected(item);
     }
     
@@ -212,21 +211,23 @@ public class MainFragment extends Fragment implements LoaderCallbacks<JSONObject
 	@Override
 	public void onLoadFinished(Loader<JSONObject> loader, JSONObject json) {
 		// TODO Auto-generated method stub
-		ContentsManager cm = new ContentsManager(getActivity());
-		String action = "";
-		
-		try {
-			action = json.getString("action");
-		} catch (JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		if(action ==  "question"){
-			cm.setQuestions(json);
-		} else if(action == "answer"){
-			cm.setAnswers(json);
-		} else if(action == "library"){
-			cm.setLibrary(json);
+		if( json != null ) {
+			ContentsManager cm = new ContentsManager(getActivity());
+			String action = "";
+			
+			try {
+				action = json.getString("action");
+			} catch (JSONException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			if(action ==  "question"){
+				cm.setQuestions(json);
+			} else if(action == "answer"){
+				cm.setAnswers(json);
+			} else if(action == "library"){
+				cm.setLibrary(json);
+			}
 		}
 	}
 
@@ -237,63 +238,12 @@ public class MainFragment extends Fragment implements LoaderCallbacks<JSONObject
 	}
 
 	public void createMenuMY(LayoutInflater inflater, ViewGroup container){
-    	String state;
-    	Cursor result;
-    	
-		rootView = inflater.inflate(R.layout.question_list, container, false);
-    	qList = (ListView)rootView.findViewById(R.id.list);
-    	mSearchView = (SearchView)rootView.findViewById(R.id.search_view);
-    	questionList = new ArrayList<HashMap<String, String>>();
-   	
-    	mp = new MainProvider(getActivity());
-    	mp.open();
-    	result = mp.fetchAllQuestion();
-    	while(result.moveToNext()){
-    		HashMap<String, String> value = new HashMap<String, String>();            	
-        	value.put(KEY_QUESTION, result.getString(1));
-        	value.put(KEY_PERSENT, result.getString(3) + "/" + result.getString(2));
-        	
-        	switch(result.getInt(4))
-        	{
-        	case 0:
-        		state = "기초학습";
-        		break;
-        	default:
-        		state = "기초학습";
-        	}
-        	value.put(KEY_STATE, state);
-        	
-        	questionList.add(value);
-		}
-    	mp.close();
-    	
-    	qAdapter = new QuestionAdapter(getActivity(), questionList);
-    	qList.setAdapter(qAdapter);
-    	qList.setTextFilterEnabled(true);
-    	setupSearchView();
-    	
-    	mWindowManager = (WindowManager)getActivity().getSystemService(Context.WINDOW_SERVICE);
-    	
-    	qList.setOnScrollListener(osl);
-        
-        LayoutInflater inflate = (LayoutInflater)getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        
-        mDialogText = (TextView) inflate.inflate(R.layout.list_position, null);
-        mDialogText.setVisibility(View.INVISIBLE);
-        
-        mHandler.post(new Runnable() {
-
-            public void run() {
-                mReady = true;
-                WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
-                        LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT,
-                        WindowManager.LayoutParams.TYPE_APPLICATION,
-                        WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
-                                | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
-                        PixelFormat.TRANSLUCENT);
-                mWindowManager.addView(mDialogText, lp);
-            }
-        });
+		rootView = inflater.inflate(R.layout.view_pager, container, false);
+		
+        // Instantiate a ViewPager and a PagerAdapter.
+        qPager = (ViewPager) rootView.findViewById(R.id.pager);
+        qPagerAdapter = new QuestionPagerAdapter(getFragmentManager());
+        qPager.setAdapter(qPagerAdapter);
 	}
 	
 	public void createMenuLibrary(LayoutInflater inflater, ViewGroup container){
@@ -302,7 +252,7 @@ public class MainFragment extends Fragment implements LoaderCallbacks<JSONObject
     	
 		rootView = inflater.inflate(R.layout.library, container, false);
     	lList = (ListView)rootView.findViewById(R.id.list);
-    	mSearchView = (SearchView)rootView.findViewById(R.id.search_view);
+    	//mSearchView = (SearchView)rootView.findViewById(R.id.search_view);
     	libraryList = new ArrayList<HashMap<String, String>>();
    	
     	mp = new MainProvider(getActivity());
@@ -348,66 +298,16 @@ public class MainFragment extends Fragment implements LoaderCallbacks<JSONObject
 	}
 	
 	public void createMenuMarket(LayoutInflater inflater, ViewGroup container){
-    	
     	if( !isOnline() ){
     		rootView = inflater.inflate(R.layout.no_connection, container, false);
     	} else {
-    		String state;
-	    	Cursor result;
-			rootView = inflater.inflate(R.layout.market, container, false);
+			rootView = inflater.inflate(R.layout.view_pager, container, false);
 			
             // Instantiate a ViewPager and a PagerAdapter.
-            mPager = (ViewPager) rootView.findViewById(R.id.market_pager);
+            mPager = (ViewPager) rootView.findViewById(R.id.pager);
             mPagerAdapter = new MarketPagerAdapter(getFragmentManager());
             mPager.setAdapter(mPagerAdapter);
     	}
-   	
-    	/*
- 
-		mList = (ListView)rootView.findViewById(R.id.list);
-		mSearchView = (SearchView)rootView.findViewById(R.id.search_view);
-		marketList = new ArrayList<HashMap<String, String>>();
-    	mp = new MainProvider(getActivity());
-    	mp.open();
-    	result = mp.fetchAllLibrary();
-    	while(result.moveToNext()){
-    		HashMap<String, String> value = new HashMap<String, String>();
-        	value.put(KEY_MARKET_NAME, result.getString(1));
-        	value.put(KEY_THUMB_URL, "http://lyd.kr:3000" + result.getString(3));
-        	marketList.add(value);
-		}
-    	mp.close();
-    	
-    	mAdapter = new MarketAdapter(getActivity(), marketList);
-    	mList.setAdapter(mAdapter);
-    	mList.setTextFilterEnabled(true);
-    	*/
-    	/*
-    	setupSearchView();
-    	
-    	mWindowManager = (WindowManager)getActivity().getSystemService(Context.WINDOW_SERVICE);
-    	
-    	lList.setOnScrollListener(osl);
-        
-        LayoutInflater inflate = (LayoutInflater)getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        
-        mDialogText = (TextView) inflate.inflate(R.layout.list_position, null);
-        mDialogText.setVisibility(View.INVISIBLE);
-        
-        mHandler.post(new Runnable() {
-
-            public void run() {
-                mReady = true;
-                WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
-                        LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT,
-                        WindowManager.LayoutParams.TYPE_APPLICATION,
-                        WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
-                                | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
-                        PixelFormat.TRANSLUCENT);
-                mWindowManager.addView(mDialogText, lp);
-            }
-        });
-        */
 	}
 	
 	public boolean isOnline() {
@@ -546,64 +446,4 @@ public class MainFragment extends Fragment implements LoaderCallbacks<JSONObject
 		});
 	}
 	
-	private OnScrollListener osl = new OnScrollListener() {
-		
-		@Override
-		public void onScrollStateChanged(AbsListView view, int scrollState) {
-			// TODO Auto-generated method stub
-			
-		}
-		
-		@Override
-		public void onScroll(AbsListView view, int firstVisibleItem,
-	            int visibleItemCount, int totalItemCount) {
-	        if (mReady) {
-	            char firstLetter = questionList.get(firstVisibleItem).get(KEY_QUESTION).charAt(0);
-	            
-	            if (!mShowing && firstLetter != mPrevLetter) {
-
-	                mShowing = true;
-	                mDialogText.setVisibility(View.VISIBLE);
-	            }
-	            mDialogText.setText(((Character)firstLetter).toString());
-	            mHandler.removeCallbacks(mRemoveWindow);
-	            mHandler.postDelayed(mRemoveWindow, 500);
-	            mPrevLetter = firstLetter;
-	        }
-	    }
-	};
-
-	private void removeWindow() {
-        if (mShowing) {
-            mShowing = false;
-            mDialogText.setVisibility(View.INVISIBLE);
-        }
-    }
-
-	private void setupSearchView() {
-        mSearchView.setIconifiedByDefault(false);
-        mSearchView.setOnQueryTextListener(qtl);
-        mSearchView.setSubmitButtonEnabled(false);
-    }
-	
-	private OnQueryTextListener qtl = new OnQueryTextListener() {
-		
-		@Override
-	    public boolean onQueryTextChange(String newText) {
-			
-	        if (TextUtils.isEmpty(newText)) {
-	        	qList.clearTextFilter();
-	        } else {
-	        	qList.setFilterText(newText.toString());
-	        }
-	        return true;
-	    }
-		
-		@Override
-	    public boolean onQueryTextSubmit(String query) {
-	        return false;
-	    }
-	};
-	
-
 }

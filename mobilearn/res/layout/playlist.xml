@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#ffffff" >
+    
+	<LinearLayout
+	    android:id="@+id/playlist_front"
+	    android:layout_width="match_parent"
+	    android:layout_height="match_parent"
+	    android:orientation="vertical"
+	    android:background="#ffffff" >
+	
+		<TextView
+	        android:id="@+id/btn_add_playlist"
+	        android:layout_width="match_parent"
+	        android:layout_height="wrap_content"
+	        android:drawableLeft="@drawable/icon_plus"
+	        android:drawablePadding="5dp"
+	        android:padding="8dp"
+	        android:textSize="18dp"
+	        android:text="@string/add_playlist" />
+		
+	    <ListView
+	        android:id="@+id/list"
+	        android:layout_width="fill_parent"
+	        android:layout_height="wrap_content"
+	        android:divider="#acacac"
+	        android:dividerHeight="1dp" >
+	    </ListView>
+	</LinearLayout>
+	
+	<LinearLayout
+	    android:id="@+id/playlist_back"
+	    android:layout_width="match_parent"
+	    android:layout_height="match_parent"
+	    android:orientation="vertical"
+	    android:background="#ffffff"
+	    android:visibility="gone" >
+
+	    <LinearLayout
+	        android:layout_width="match_parent"
+	        android:layout_height="wrap_content"
+	        android:paddingTop="5dp"
+	        android:paddingBottom="5dp" >
+	        
+	        <TextView
+		        android:id="@+id/btn_edit_playlist"
+		        android:layout_width="0dp"
+		        android:layout_height="wrap_content"
+		        android:layout_weight="0.25"
+		        android:gravity="center"
+		        android:padding="3dp"
+		        android:textSize="15dp"
+		        android:text="@string/edit_playlist" />
+	        <TextView
+		        android:id="@+id/btn_empty_playlist"
+		        android:layout_width="0dp"
+		        android:layout_height="wrap_content"
+		        android:layout_weight="0.25"
+		        android:gravity="center"
+		        android:padding="3dp"
+		        android:textSize="15dp"
+		        android:text="@string/empty_playlist" />
+	        <TextView
+		        android:id="@+id/btn_del_playlist"
+		        android:layout_width="0dp"
+		        android:layout_height="wrap_content"
+		        android:layout_weight="0.25"
+		        android:gravity="center"
+		        android:padding="3dp"
+		        android:textSize="15dp"
+		        android:text="@string/del_playlist" />	        
+	        <TextView
+		        android:id="@+id/btn_complete_playlist"
+		        android:layout_width="0dp"
+		        android:layout_height="wrap_content"
+		        android:layout_weight="0.25"
+		        android:gravity="center"
+		        android:padding="3dp"
+		        android:textSize="15dp"
+		        android:text="@string/complete_playlist" />
+	    </LinearLayout>
+	    	    
+	    <ListView
+	        android:id="@+id/list_back"
+	        android:layout_width="fill_parent"
+	        android:layout_height="wrap_content"
+	        android:divider="#acacac"
+	        android:dividerHeight="1dp" >
+	    </ListView>
+
+	</LinearLayout>
+</LinearLayout>	

@@ -19,8 +19,7 @@ public class JSONParser {
 	static InputStream is = null;
 	static JSONObject jObj = null;
 	static String json = "";
-	static int responseCode = 0;
-	
+		
 	public JSONParser(){
 		
 	}
@@ -28,6 +27,7 @@ public class JSONParser {
 	public JSONObject getJSONFromUrl(String u, String action) {
 		 
 		HttpURLConnection conn = null;
+		int responseCode = 0;
 		
         // Making HTTP request
         try {
@@ -55,30 +55,34 @@ public class JSONParser {
             e.printStackTrace();
         } 
         
-        try {
-            BufferedReader reader = new BufferedReader(new InputStreamReader(
-                    is, "UTF8"), 8);
-            StringBuilder sb = new StringBuilder();
-            String line = null;
-            while ((line = reader.readLine()) != null) {
-                sb.append(line + "\n");
+        if(responseCode == HttpURLConnection.HTTP_OK) {
+        	try {
+                BufferedReader reader = new BufferedReader(new InputStreamReader(
+                        is, "UTF8"), 8);
+                StringBuilder sb = new StringBuilder();
+                String line = null;
+                while ((line = reader.readLine()) != null) {
+                    sb.append(line + "\n");
+                }
+                is.close();
+                json = sb.toString();
+            } catch (Exception e) {
+                Log.e("Buffer Error", "Error converting result " + e.toString());
+            } finally{
+            	conn.disconnect();
             }
-            is.close();
-            json = sb.toString();
-        } catch (Exception e) {
-            Log.e("Buffer Error", "Error converting result " + e.toString());
-        } finally{
-        	conn.disconnect();
+            
+            try {
+            	jObj = new JSONObject(json);
+            	jObj.put("action", action);
+            	
+    	    } catch (JSONException e) {
+    	        e.printStackTrace();
+    	    }  
         }
+        else 
+        	conn.disconnect();
         
-        try {
-        	jObj = new JSONObject(json);
-        	jObj.put("action", action);
-        	
-	    } catch (JSONException e) {
-	        e.printStackTrace();
-	    }          
-
         return jObj;
     }
 }
