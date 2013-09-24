@@ -4,20 +4,19 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.support.v13.app.FragmentStatePagerAdapter;
 
-public class MyPagerAdapter extends FragmentStatePagerAdapter {
-    public MyPagerAdapter(FragmentManager fm) {
+public class QuestionPagerAdapter extends FragmentStatePagerAdapter {
+    public QuestionPagerAdapter(FragmentManager fm) {
         super(fm);
     }
 
     @Override
     public Fragment getItem(int position) {
-        return MyFragment.create(position);
+        return QuestionFragment.create(position, QuestionActivity.ARR_OID_QUESTION);
     }
     
     @Override
     public int getCount() {
-        //return MainFragment.NUM_PAGES;
-    	return MainFragment.MY_NUM_PAGES;
+    	return QuestionActivity.QUESTION_PAGE_NUM;
     }
     
     @Override

@@ -39,13 +39,13 @@ public class MainFragment extends Fragment implements LoaderCallbacks<JSONObject
     private LibraryAdapter lAdapter;
 	private MainProvider mp;
 	private View rootView;
-	private ViewPager qPager;
+	private ViewPager myPager;
 	private ViewPager mPager;
-	private PagerAdapter qPagerAdapter;
+	private PagerAdapter myPagerAdapter;
 	private PagerAdapter mPagerAdapter;
 	
 	public static final String MENU_NUMBER = "menu_number";
-	public static final int QUESTION_NUM_PAGES = 2;	
+	public static final int MY_NUM_PAGES = 2;	
 	public static final int NUM_PAGES = 2;
 	
     static final String KEY_MARKET_NAME = "market_name";
@@ -151,10 +151,10 @@ public class MainFragment extends Fragment implements LoaderCallbacks<JSONObject
     	case 1:
             switch (item.getItemId()) {
 	        case R.id.action_list:
-                qPager.setCurrentItem(0);
+	        	myPager.setCurrentItem(0);
                 return true;
             case R.id.action_playlist:
-            	qPager.setCurrentItem(1);
+            	myPager.setCurrentItem(1);
                 return true;
 	        }    		break;
     	case 4:
@@ -218,9 +218,9 @@ public class MainFragment extends Fragment implements LoaderCallbacks<JSONObject
 		rootView = inflater.inflate(R.layout.view_pager, container, false);
 		
         // Instantiate a ViewPager and a PagerAdapter.
-        qPager = (ViewPager) rootView.findViewById(R.id.pager);
-        qPagerAdapter = new MyPagerAdapter(getFragmentManager());
-        qPager.setAdapter(qPagerAdapter);
+		myPager = (ViewPager) rootView.findViewById(R.id.pager);
+		myPagerAdapter = new MyPagerAdapter(getFragmentManager());
+        myPager.setAdapter(myPagerAdapter);
 	}
 	
 	public void createMenuLibrary(LayoutInflater inflater, ViewGroup container){

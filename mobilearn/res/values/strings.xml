@@ -15,6 +15,9 @@
     <string name="a6"></string>
     <string name="unlock">탭하여 잠금해제(5)</string>
     
+    <string name="mode_question">Question</string>
+    <string name="mode_view">View</string>
+    
     <string name="add_playlist">Register New PlayList...</string>
     <string name="edit_playlist">Edit</string>
     <string name="del_playlist">Delete</string>

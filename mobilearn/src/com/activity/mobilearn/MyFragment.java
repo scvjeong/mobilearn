@@ -127,9 +127,11 @@ public class MyFragment extends Fragment{
 		String state;
     	Cursor result;
     	ArrayList<HashMap<String, String>> questionList = new ArrayList<HashMap<String, String>>();
+    	long oid_library = 16391;
+    	
     	mp = new MainProvider(getActivity());
     	mp.open();
-    	result = mp.fetchAllQuestion();
+    	result = mp.fetchAllQuestionInLibrary(oid_library);
     	while(result.moveToNext()){
     		HashMap<String, String> value = new HashMap<String, String>();
     		value.put(MainProvider.KEY_OID, result.getString(0));
@@ -184,11 +186,26 @@ public class MyFragment extends Fragment{
     private OnItemClickListener detailQuestionListener = new OnItemClickListener() {
 		@Override
 		public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
+			long oidLibrary = 16391;
+			long oidPlayList = 0;
 			Intent i = new Intent(getActivity(), QuestionActivity.class);
-			Bundle args = new Bundle();
-	        args.putInt(MainProvider.KEY_OID_QUESTION, Integer.parseInt(qAdapter.getItem(position).get(MainProvider.KEY_OID)));
-	        i.putExtra(MainProvider.KEY_OID_QUESTION, Integer.parseInt(qAdapter.getItem(position).get(MainProvider.KEY_OID)));
-			getActivity().startActivity(i);
+	        i.putExtra(MainProvider.KEY_OID_QUESTION, Long.parseLong(qAdapter.getItem(position).get(MainProvider.KEY_OID)));
+	        i.putExtra(MainProvider.KEY_OID_LIBRARY, oidLibrary);
+	        i.putExtra(MainProvider.KEY_OID_PLAYLIST, oidPlayList);
+	        getActivity().startActivity(i);
+			getActivity().overridePendingTransition(0, 0);
+		}
+    };
+    
+    private OnItemClickListener detailQuestionForPlayListListener = new OnItemClickListener() {
+		@Override
+		public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
+			long oidLibrary = 16391;
+			Intent i = new Intent(getActivity(), QuestionActivity.class);
+	        i.putExtra(MainProvider.KEY_OID_QUESTION, Long.parseLong(qAdapterForPlayList.getItem(position).get(MainProvider.KEY_OID)));
+	        i.putExtra(MainProvider.KEY_OID_LIBRARY, oidLibrary);
+	        i.putExtra(MainProvider.KEY_OID_PLAYLIST, currentPlayList);
+	        getActivity().startActivity(i);
 			getActivity().overridePendingTransition(0, 0);
 		}
     };
@@ -276,6 +293,7 @@ public class MyFragment extends Fragment{
 			currentPlayList = Long.parseLong(pAdapter.getItem(position).get(MainProvider.KEY_OID));
 			qAdapterForPlayList = getQuestionAdapterForPlayList(currentPlayList);
         	bList.setAdapter(qAdapterForPlayList);
+        	bList.setOnItemClickListener(detailQuestionForPlayListListener);
 			flipit();
 		}
     };

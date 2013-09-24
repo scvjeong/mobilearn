@@ -142,14 +142,27 @@ public class MainProvider {
         return mDb.delete(TABLE_QUESTION, KEY_OID + "=" + rowId, null) > 0;
     }
  
-    public Cursor fetchAllQuestion() {
+    public Cursor fetchAllQuestionInLibrary(long oid_library) {
     	String sql = "SELECT " + KEY_OID +", "
     			+ KEY_QUESTION + ", " 
     			+ KEY_COUNT + ", "
     			+ KEY_CORRECT_ANSWER_CNT + ", "
     			+ KEY_STATE + " "
     			+ " FROM " + TABLE_QUESTION
+    			+ " WHERE  " + KEY_OID_LIBRARY + " = " + oid_library
     			+ " ORDER BY " + KEY_QUESTION + " ASC";
+        Cursor mCursor = mDb.rawQuery(sql, null);
+        if (mCursor != null) {
+            mCursor.moveToFirst();
+        }
+        return mCursor;
+        //return mDb.query(TABLE_QUESTION, new String[] { KEY_OID, KEY_QUESTION, KEY_COUNT, KEY_CORRECT_ANSWER_CNT, KEY_STATE }, null, null, null, null, KEY_QUESTION + " ASC");
+    }
+    
+    public Cursor fetchAllQuestionInLibraryForCount(long oid_library) {
+    	String sql = "SELECT COUNT(*) "
+    			+ " FROM " + TABLE_QUESTION
+    			+ " WHERE  " + KEY_OID_LIBRARY + " = " + oid_library;
         Cursor mCursor = mDb.rawQuery(sql, null);
         if (mCursor != null) {
             mCursor.moveToFirst();
@@ -171,11 +184,10 @@ public class MainProvider {
         return mCursor;
     }
     
-    public Cursor fetchOneQuestion(long oid_library, long oid_question) throws SQLException {
+    public Cursor fetchOneQuestion(long oid_question) throws SQLException {
     	String sql = "SELECT oid, question " 
     			+ " FROM " + TABLE_QUESTION
-    			+ " WHERE "+ KEY_OID_LIBRARY +" = " + oid_library
-    			+ " AND "+ KEY_OID +" = " + oid_question;
+    			+ " WHERE "+ KEY_OID +" = " + oid_question;
         Cursor mCursor = mDb.rawQuery(sql, null);
         if (mCursor != null) {
             mCursor.moveToFirst();
