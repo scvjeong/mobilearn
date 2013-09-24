@@ -26,7 +26,11 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewGroup.LayoutParams;
+import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.TableLayout;
+import android.widget.TableRow;
 import android.widget.TextView;
 
 import com.example.mobilearn.R;
@@ -66,7 +70,7 @@ public class MainFragment extends Fragment implements LoaderCallbacks<JSONObject
     	if(i == 1 || i == 4) 
     		setHasOptionsMenu(true);
     }
-    
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
@@ -83,6 +87,18 @@ public class MainFragment extends Fragment implements LoaderCallbacks<JSONObject
        			serviceState.setText("ON");
        		else
        			serviceState.setText("OFF");
+       		LinearLayout layoutChartRadar = (LinearLayout) rootView.findViewById(R.id.layout_chart_radar);
+       		float chartData[] = {30, 26, 15, 28, 24};
+       		View chartRaderView = new ChartRaderView(getActivity(), chartData);
+       		chartRaderView.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+       		layoutChartRadar.addView(chartRaderView);
+       		
+       		LinearLayout layoutChartLine = (LinearLayout) rootView.findViewById(R.id.layout_chart_line);
+    		float chartData2[] = {200, 100, 50, 120, 100, 180, 160, 105};
+       		View chartLineView = new ChartLineView(getActivity(), chartData2);
+       		chartLineView.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+       		layoutChartLine.addView(chartLineView);
+       		
        		break;
         case 1:
         	createMenuMY(inflater, container);
@@ -301,13 +317,15 @@ public class MainFragment extends Fragment implements LoaderCallbacks<JSONObject
 		@Override
 		public boolean onTouch(View v, MotionEvent event) {
 			// TODO Auto-generated method stub
-			if(event.getAction() == MotionEvent.ACTION_DOWN) {
-				((TextView)v).setBackgroundColor(Color.rgb(166, 156, 142));
-				((TextView)v).setBackgroundColor(Color.rgb(255, 255, 255));
+			//TextView tv = (TextView)v;
+			/*
+			if(event.getAction() == MotionEvent.ACTION_DOWN && !tv.getText().equals("")) {
+				v.setBackgroundColor(Color.rgb(166, 156, 142));
 				return true;
 			} 
+			*/
 			return false;
-		} 
+		}
     }
 	
 	public void createMenuSetting(LayoutInflater inflater, ViewGroup container){
@@ -316,31 +334,20 @@ public class MainFragment extends Fragment implements LoaderCallbacks<JSONObject
 		rootView = inflater.inflate(R.layout.setting, container, false);
 		TextView sls = (TextView)rootView.findViewById(R.id.setting_lock_screen);
 		TextView sv = (TextView)rootView.findViewById(R.id.setting_vibration);
-		TextView t1 = (TextView)rootView.findViewById(R.id.time_1);
-		TextView t2 = (TextView)rootView.findViewById(R.id.time_2);
-		TextView t3 = (TextView)rootView.findViewById(R.id.time_3);
-		TextView t4 = (TextView)rootView.findViewById(R.id.time_4);
-		TextView t5 = (TextView)rootView.findViewById(R.id.time_5);
-		TextView t6 = (TextView)rootView.findViewById(R.id.time_6);
-		TextView t7 = (TextView)rootView.findViewById(R.id.time_7);
-		TextView t8 = (TextView)rootView.findViewById(R.id.time_8);
-		TextView t9 = (TextView)rootView.findViewById(R.id.time_9);
-		TextView t10 = (TextView)rootView.findViewById(R.id.time_10);
-		TextView t11 = (TextView)rootView.findViewById(R.id.time_11);
-		TextView t12 = (TextView)rootView.findViewById(R.id.time_12);
-		
-		t1.setOnTouchListener(touchListener);
-		t2.setOnTouchListener(touchListener);
-		t3.setOnTouchListener(touchListener);
-		t4.setOnTouchListener(touchListener);
-		t5.setOnTouchListener(touchListener);
-		t6.setOnTouchListener(touchListener);
-		t7.setOnTouchListener(touchListener);
-		t8.setOnTouchListener(touchListener);
-		t9.setOnTouchListener(touchListener);
-		t10.setOnTouchListener(touchListener);
-		t11.setOnTouchListener(touchListener);
-		t12.setOnTouchListener(touchListener);
+		TableLayout timeTable = (TableLayout)rootView.findViewById(R.id.time_table);
+		timeTable.setOnTouchListener(touchListener);
+		int a = timeTable.getChildCount();
+		Log.e("a","a : " + a);
+		int i, j;
+		TableRow tr;
+		TextView td;
+		for(i=0; i<timeTable.getChildCount(); i++) {
+			tr = (TableRow)timeTable.getChildAt(i);
+			for(j=0; j<tr.getChildCount(); j++) {
+				td = (TextView)tr.getChildAt(j);
+				td.setOnTouchListener(touchListener);
+			}
+		}
 		
 		mp = new MainProvider(getActivity());
     	mp.open();
@@ -376,6 +383,27 @@ public class MainFragment extends Fragment implements LoaderCallbacks<JSONObject
     			mp.updateSettingItem("vibration", "OFF");
 				sv.setText("OFF");
     		}
+    	}
+    	for(i=1; i<24; i++)
+    	{
+	    	result = mp.fetchSetting("time_" + i);
+	    	/*
+	    	if(result.getCount() < 1) {
+	    		mp.insertSetting("vibration", "ON");
+	    		sv.setText("ON");
+	    	}
+	    	else if(result.move(0)) {
+	    		String value = result.getString(0);
+	    		if(value.equals("ON")){
+	    			mp.updateSettingItem("vibration", "ON");
+	        		sv.setText("ON");
+	    		}
+	    		else{
+	    			mp.updateSettingItem("vibration", "OFF");
+					sv.setText("OFF");
+	    		}
+	    	}
+	    	*/
     	}
     	mp.close();
     	

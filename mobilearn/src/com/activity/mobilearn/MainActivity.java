@@ -135,16 +135,16 @@ public class MainActivity extends Activity{
 		switch(position)
 		{
 		case 0:
-			getActionBar().setBackgroundDrawable(new ColorDrawable(Color.rgb(76, 162, 141)));
+			getActionBar().setBackgroundDrawable(new ColorDrawable(Color.rgb(114, 162, 150)));
 			break;
 		case 1:
-			getActionBar().setBackgroundDrawable(new ColorDrawable(Color.rgb(233, 143, 14)));
+			getActionBar().setBackgroundDrawable(new ColorDrawable(Color.rgb(233, 163, 62)));
 			break;
 		case 2:
 			getActionBar().setBackgroundDrawable(new ColorDrawable(Color.rgb(58, 36, 4)));
 			break;
 		case 3:
-			getActionBar().setBackgroundDrawable(new ColorDrawable(Color.rgb(126, 20, 32)));
+			getActionBar().setBackgroundDrawable(new ColorDrawable(Color.rgb(127, 50, 59)));
 			break;
 		case 4:
 			getActionBar().setBackgroundDrawable(new ColorDrawable(Color.rgb(172, 172, 172)));
