@@ -6,24 +6,18 @@ import java.util.HashMap;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.app.ActionBar;
 import android.app.Fragment;
-import android.app.FragmentManager;
 import android.app.LoaderManager.LoaderCallbacks;
 import android.content.Context;
 import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
 import android.graphics.Color;
-import android.graphics.PixelFormat;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
-import android.os.Handler;
-import android.support.v4.app.NavUtils;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -32,33 +26,18 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
-import android.view.View.OnCreateContextMenuListener;
-import android.view.WindowManager.LayoutParams;
-import android.widget.AbsListView;
 import android.widget.ListView;
-import android.widget.SearchView;
-import android.widget.Switch;
 import android.widget.TextView;
-import android.widget.AbsListView.OnScrollListener;
-import android.widget.SearchView.OnQueryTextListener;
 
 import com.example.mobilearn.R;
 import com.service.mobilearn.LockScreenService;
 
 public class MainFragment extends Fragment implements LoaderCallbacks<JSONObject>{
 	
-	private ArrayList<HashMap<String, String>> questionList = new ArrayList<HashMap<String, String>>();
 	private ArrayList<HashMap<String, String>> libraryList = new ArrayList<HashMap<String, String>>();
-	private ArrayList<HashMap<String, String>> marketList = new ArrayList<HashMap<String, String>>();
-	private ListView qList;
 	private ListView lList;
-	private ListView mList;
-    private QuestionAdapter qAdapter;
     private LibraryAdapter lAdapter;
-    private MarketAdapter mAdapter;
 	private MainProvider mp;
-	private Switch swc;
 	private View rootView;
 	private ViewPager qPager;
 	private ViewPager mPager;
@@ -68,7 +47,6 @@ public class MainFragment extends Fragment implements LoaderCallbacks<JSONObject
 	public static final String MENU_NUMBER = "menu_number";
 	public static final int QUESTION_NUM_PAGES = 2;	
 	public static final int NUM_PAGES = 2;
-	private static final OnQueryTextListener OnQueryTextListener = null;
 	
     static final String KEY_MARKET_NAME = "market_name";
     static final String KEY_LIBRARY_NAME = "library_name";
@@ -94,7 +72,6 @@ public class MainFragment extends Fragment implements LoaderCallbacks<JSONObject
             Bundle savedInstanceState) {
 
     	int i = getArguments().getInt(MENU_NUMBER);
-        Cursor result;
         Bundle args;
         String url;
         
@@ -242,12 +219,11 @@ public class MainFragment extends Fragment implements LoaderCallbacks<JSONObject
 		
         // Instantiate a ViewPager and a PagerAdapter.
         qPager = (ViewPager) rootView.findViewById(R.id.pager);
-        qPagerAdapter = new QuestionPagerAdapter(getFragmentManager());
+        qPagerAdapter = new MyPagerAdapter(getFragmentManager());
         qPager.setAdapter(qPagerAdapter);
 	}
 	
 	public void createMenuLibrary(LayoutInflater inflater, ViewGroup container){
-    	String state;
     	Cursor result;
     	
 		rootView = inflater.inflate(R.layout.library, container, false);

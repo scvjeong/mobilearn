@@ -62,8 +62,8 @@ public class LibraryAdapter extends BaseAdapter implements Filterable{
 		HashMap<String, String> library = new HashMap<String, String>();
 		library = data.get(position);
 		
-		title.setText(library.get(MainActivity.KEY_LIBRARY_NAME));
-		imageLoader.DisplayImage(library.get(MainActivity.KEY_THUMB_URL), thumb_image);
+		title.setText(library.get(MainProvider.KEY_NAME));
+		imageLoader.DisplayImage(library.get(MainProvider.KEY_THUMB_URL), thumb_image);
 		
 		//vi.setBackgroundColor((position & 1) == 1 ? Color.WHITE : Color.rgb(172,172,172) );
 
@@ -97,7 +97,7 @@ public class LibraryAdapter extends BaseAdapter implements Filterable{
 				ArrayList<HashMap<String, String>> nData = new ArrayList<HashMap<String, String>>();
 				
 				for (HashMap<String, String> d : fData) {
-					if(d.get(MainActivity.KEY_LIBRARY_NAME).toUpperCase().startsWith(constraint.toString().toUpperCase()))
+					if(d.get(MainProvider.KEY_NAME).toUpperCase().startsWith(constraint.toString().toUpperCase()))
 						nData.add(d);
 				}
 

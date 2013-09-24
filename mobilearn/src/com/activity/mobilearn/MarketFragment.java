@@ -131,10 +131,10 @@ public class MarketFragment extends Fragment implements LoaderCallbacks<JSONObje
 	            String price  = c.getString("price");
 	            String thumbnail_url  = c.getString("thumbnail_url");
 	            HashMap<String, String> value = new HashMap<String, String>();
-	            value.put(MainActivity.KEY_MARKET_NAME, content_name);
-	            value.put(MainActivity.KEY_MARKET_OWNER, nickname);
-	            value.put(MainActivity.KEY_MARKET_PRICE, price);
-	            value.put(MainActivity.KEY_THUMB_URL, thumbnail_url);
+	            value.put(MainProvider.KEY_NAME, content_name);
+	            value.put(MainProvider.KEY_OWNER, nickname);
+	            value.put(MainProvider.KEY_PRICE, price);
+	            value.put(MainProvider.KEY_THUMB_URL, thumbnail_url);
 	            contentsList.add(value);
 	        }
 	    } catch (JSONException e) {

@@ -7,7 +7,6 @@ import com.example.mobilearn.R;
 
 import android.app.Activity;
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -37,9 +36,32 @@ public class PlayListAdapter extends BaseAdapter implements Filterable{
 	}
 
 	@Override
-	public Object getItem(int position) {
+	public HashMap<String, String> getItem(int position) {
 		// TODO Auto-generated method stub
 		return data.get(position);
+	}
+	
+	public void removeItem(int position) {
+		data.remove(position);
+	}
+	
+	public void removeItemByOid(long oid) {
+		int i;
+		long keyOid;
+		for(i=0; i<data.size(); i++){
+			keyOid = Long.parseLong(data.get(i).get(MainProvider.KEY_OID));
+			if(keyOid == oid)
+				data.remove(i);
+		}
+	}
+
+	public void removeAllItem() {
+		data.clear();
+	}
+	
+	public int setItem(HashMap<String, String> item){
+		data.add(0, item);
+		return (data.size()-1);
 	}
 
 	@Override

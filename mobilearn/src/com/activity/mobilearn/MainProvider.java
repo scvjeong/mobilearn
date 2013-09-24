@@ -10,17 +10,23 @@ import android.util.Log;
  
 public class MainProvider {
  
-	public static final String KEY_OID_LIBRARY = "oid_library";
+	
+	public static final String KEY_PRICE = "price";
+	public static final String KEY_OWNER = "owner";
+	public static final String KEY_PERSENT = "persent";
+	public static final String KEY_THUMB_URL = "thumb_url";
     public static final String KEY_QUESTION = "question";
     public static final String KEY_COUNT = "count";
-    public static final String KEY_OID = "oid";
     public static final String KEY_NAME = "name";
     public static final String KEY_TYPE = "type";
     public static final String KEY_UPDATE_DATE = "update_date";
     public static final String KEY_IS_USE = "is_use";
     public static final String KEY_REPLY = "reply";
     public static final String KEY_ANSWER = "answer";
+    public static final String KEY_OID = "oid";
+    public static final String KEY_OID_LIBRARY = "oid_library";
     public static final String KEY_OID_QUESTION = "oid_question";
+    public static final String KEY_OID_PLAYLIST = "oid_playlist";
     public static final String KEY_CORRECT_ANSWER_CNT = "correct_answer_cnt";
     public static final String KEY_STATE = "state";
     public static final String KEY_ITEM = "item";
@@ -152,12 +158,24 @@ public class MainProvider {
         //return mDb.query(TABLE_QUESTION, new String[] { KEY_OID, KEY_QUESTION, KEY_COUNT, KEY_CORRECT_ANSWER_CNT, KEY_STATE }, null, null, null, null, KEY_QUESTION + " ASC");
     }
  
-    public Cursor fetchQuestion(int oid_library, int limit) throws SQLException {
+    public Cursor fetchQuestion(long oid_library, int limit) throws SQLException {
     	String sql = "SELECT oid, question " 
     			+ " FROM " + TABLE_QUESTION
     			+ " WHERE "+ KEY_OID_LIBRARY +" = " + oid_library
     			+ " ORDER BY count ASC, oid ASC"
     			+ " LIMIT " + limit;
+        Cursor mCursor = mDb.rawQuery(sql, null);
+        if (mCursor != null) {
+            mCursor.moveToFirst();
+        }
+        return mCursor;
+    }
+    
+    public Cursor fetchOneQuestion(long oid_library, long oid_question) throws SQLException {
+    	String sql = "SELECT oid, question " 
+    			+ " FROM " + TABLE_QUESTION
+    			+ " WHERE "+ KEY_OID_LIBRARY +" = " + oid_library
+    			+ " AND "+ KEY_OID +" = " + oid_question;
         Cursor mCursor = mDb.rawQuery(sql, null);
         if (mCursor != null) {
             mCursor.moveToFirst();
@@ -281,14 +299,47 @@ public class MainProvider {
         return mDb.update(TABLE_SETTING, args, KEY_ITEM + "= '" + item + "'", null) > 0;
     }
     
-    public long insertPlayList(String title, int oid_library) {
+    public long insertPlayList(String title, long oid_library) {
         ContentValues initialValues = new ContentValues();
         initialValues.put(KEY_TITLE, title);
         initialValues.put(KEY_OID_LIBRARY, oid_library);
         return mDb.insert(TABLE_PLAYLIST, null, initialValues);
     }
     
+    public boolean deletePlayList(long oid_playlist) {
+        return mDb.delete(TABLE_PLAYLIST, KEY_OID + "=" + oid_playlist, null) > 0;
+    }
+    
     public Cursor fetchAllPlayList() {
     	return mDb.query(TABLE_PLAYLIST, new String[] { KEY_OID, KEY_TITLE }, null, null, null, null, KEY_OID + " DESC");
+    }
+    
+    public long insertPlayListQustion(long oid_playlist, long oid_question) {
+        ContentValues initialValues = new ContentValues();
+        initialValues.put(KEY_OID_PLAYLIST, oid_playlist);
+        initialValues.put(KEY_OID_QUESTION, oid_question);
+        return mDb.insert(TABLE_PLAYLIST_QUESTION, null, initialValues);
+    }
+    
+    public boolean deletePlayListQustion(long oid_playlist) {
+        return mDb.delete(TABLE_PLAYLIST_QUESTION, KEY_OID_PLAYLIST + "=" + oid_playlist, null) > 0;
+    }
+    
+    public Cursor fetchPlayListQuestion(long oid_playlist) throws SQLException {
+    	String sql = "SELECT " + TABLE_QUESTION + "." +  KEY_OID
+    			+ " , " + TABLE_QUESTION + "." +  KEY_QUESTION
+    			+ " , " + TABLE_QUESTION + "." +  KEY_COUNT
+    			+ " , " + TABLE_QUESTION + "." +  KEY_CORRECT_ANSWER_CNT
+    			+ " , " + TABLE_QUESTION + "." +  KEY_STATE
+    			+ " FROM " + TABLE_PLAYLIST_QUESTION
+    			+ " INNER JOIN " + TABLE_QUESTION
+    			+ " ON " + TABLE_PLAYLIST_QUESTION + "." + KEY_OID_QUESTION + " = " + TABLE_QUESTION + "." + KEY_OID
+    			+ " WHERE "+ KEY_OID_PLAYLIST +" = " + oid_playlist;
+    			
+        Cursor mCursor = mDb.rawQuery(sql, null);
+        if (mCursor != null) {
+            mCursor.moveToFirst();
+        }
+        return mCursor;
     }
 }

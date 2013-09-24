@@ -15,6 +15,7 @@
         android:layout_height="wrap_content"
         android:divider="#acacac"
         android:dividerHeight="1dp"
-        android:background="#ffffff"/>
+        android:background="#fff"
+        android:listSelector="@drawable/list_selector" />
     
 </LinearLayout>

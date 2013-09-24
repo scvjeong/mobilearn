@@ -65,10 +65,10 @@ public class MarketAdapter extends BaseAdapter implements Filterable{
 		HashMap<String, String> library = new HashMap<String, String>();
 		library = data.get(position);
 		
-		title.setText(library.get(MainActivity.KEY_MARKET_NAME));
-		nickname.setText(library.get(MainActivity.KEY_MARKET_OWNER));
-		price.setText("$" + library.get(MainActivity.KEY_MARKET_PRICE));
-		String thumb_url = library.get(MainActivity.KEY_THUMB_URL);
+		title.setText(library.get(MainProvider.KEY_NAME));
+		nickname.setText(library.get(MainProvider.KEY_OWNER));
+		price.setText("$" + library.get(MainProvider.KEY_PRICE));
+		String thumb_url = library.get(MainProvider.KEY_THUMB_URL);
 		if( !thumb_url.equals("null") ) {
 			imageLoader.DisplayImage("http://lyd.kr:3000" + thumb_url, thumb_image);
 		}
@@ -105,7 +105,7 @@ public class MarketAdapter extends BaseAdapter implements Filterable{
 				ArrayList<HashMap<String, String>> nData = new ArrayList<HashMap<String, String>>();
 				
 				for (HashMap<String, String> d : fData) {
-					if(d.get(MainActivity.KEY_MARKET_NAME).toUpperCase().startsWith(constraint.toString().toUpperCase()))
+					if(d.get(MainProvider.KEY_NAME).toUpperCase().startsWith(constraint.toString().toUpperCase()))
 						nData.add(d);
 				}
 

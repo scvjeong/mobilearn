@@ -70,16 +70,6 @@ public class MainActivity extends Activity{
     LockScreenService lService;
     boolean mBound = false;
     
-    static final String KEY_MARKET_NAME = "market_name";
-    static final String KEY_MARKET_OWNER = "market_owner";
-    static final String KEY_MARKET_PRICE = "market_price";
-    static final String KEY_LIBRARY_NAME = "library_name";
-    static final String KEY_THUMB_URL = "thumb_url";
-    static final String KEY_QUESTION = "question_name";
-    static final String KEY_PERSENT = "persent";
-    static final String KEY_STATE = "state";
-    
-    
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

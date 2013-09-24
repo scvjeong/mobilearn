@@ -1,10 +1,10 @@
 package com.activity.mobilearn;
 
-import java.security.InvalidAlgorithmParameterException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
 import com.example.mobilearn.R;
+import com.service.mobilearn.LockScreenService;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -15,13 +15,19 @@ import android.app.DialogFragment;
 import android.app.Fragment;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.PixelFormat;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.SparseBooleanArray;
+import android.view.ActionMode;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -33,9 +39,11 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.SearchView.OnQueryTextListener;
 import android.view.animation.Animation;
@@ -43,21 +51,20 @@ import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
 
-public class QuestionFragment extends Fragment{
+public class MyFragment extends Fragment{
     
     public static final String ARG_PAGE = "page";
 
     private int qPageNumber;
+    private long currentPlayList;
     private View rootView;
-    private ArrayList<HashMap<String, String>> questionList = new ArrayList<HashMap<String, String>>();
-	private ListView qList;
-	private ListView bList;
-	private LinearLayout fLayout;
-	private LinearLayout bLayout;
-    private ViewGroup mContainer;
-	private QuestionAdapter qAdapter;
+    
+	private ListView qList, bList, pList;
+	private LinearLayout fLayout, bLayout;
+	private QuestionAdapter qAdapter, qAdapterForPlayList;
     private PlayListAdapter pAdapter;
     private MainProvider mp;
+    private LinearLayout playlist_menu;
     
 	private final class RemoveWindow implements Runnable {
         public void run() {
@@ -77,15 +84,15 @@ public class QuestionFragment extends Fragment{
     private Interpolator accelerator = new AccelerateInterpolator();
     private Interpolator decelerator = new DecelerateInterpolator();
     
-    public static QuestionFragment create(int pageNumber) {
-    	QuestionFragment fragment = new QuestionFragment();
+    public static MyFragment create(int pageNumber) {
+    	MyFragment fragment = new MyFragment();
         Bundle args = new Bundle();
         args.putInt(ARG_PAGE, pageNumber);
         fragment.setArguments(args);
         return fragment;
     }
 
-    public QuestionFragment() {
+    public MyFragment() {
     }
 
     @Override
@@ -116,22 +123,18 @@ public class QuestionFragment extends Fragment{
         return qPageNumber;
     }
 	
-	public void loadQuestionList(LayoutInflater inflater, ViewGroup container){
+    public QuestionAdapter getQuestionAdapter(){
 		String state;
     	Cursor result;
-    	
-		rootView = inflater.inflate(R.layout.question_list, container, false);
-    	qList = (ListView)rootView.findViewById(R.id.list);
-    	mSearchView = (SearchView)rootView.findViewById(R.id.search_view);
-    	questionList = new ArrayList<HashMap<String, String>>();
-   	
+    	ArrayList<HashMap<String, String>> questionList = new ArrayList<HashMap<String, String>>();
     	mp = new MainProvider(getActivity());
     	mp.open();
     	result = mp.fetchAllQuestion();
     	while(result.moveToNext()){
-    		HashMap<String, String> value = new HashMap<String, String>();            	
-        	value.put(MainActivity.KEY_QUESTION, result.getString(1));
-        	value.put(MainActivity.KEY_PERSENT, result.getString(3) + "/" + result.getString(2));
+    		HashMap<String, String> value = new HashMap<String, String>();
+    		value.put(MainProvider.KEY_OID, result.getString(0));
+        	value.put(MainProvider.KEY_QUESTION, result.getString(1));
+        	value.put(MainProvider.KEY_PERSENT, result.getString(3) + "/" + result.getString(2));
         	
         	switch(result.getInt(4))
         	{
@@ -141,15 +144,66 @@ public class QuestionFragment extends Fragment{
         	default:
         		state = "기초학습";
         	}
-        	value.put(MainActivity.KEY_STATE, state);
+        	value.put(MainProvider.KEY_STATE, state);
         	
         	questionList.add(value);
 		}
     	mp.close();
+    	return new QuestionAdapter(getActivity(), questionList);
+    }
+    
+    public QuestionAdapter getQuestionAdapterForPlayList(long oid_playlist){
+		String state;
+    	Cursor result;
+    	ArrayList<HashMap<String, String>> questionList = new ArrayList<HashMap<String, String>>();
+    	mp = new MainProvider(getActivity());
+    	mp.open();
+    	result = mp.fetchPlayListQuestion(oid_playlist);
+    	while(result.moveToNext()){
+    		HashMap<String, String> value = new HashMap<String, String>();
+    		value.put(MainProvider.KEY_OID, result.getString(0));
+        	value.put(MainProvider.KEY_QUESTION, result.getString(1));
+        	value.put(MainProvider.KEY_PERSENT, result.getString(3) + "/" + result.getString(2));
+        	
+        	switch(result.getInt(4))
+        	{
+        	case 0:
+        		state = "기초학습";
+        		break;
+        	default:
+        		state = "기초학습";
+        	}
+        	value.put(MainProvider.KEY_STATE, state);
+        	
+        	questionList.add(value);
+		}
+    	mp.close();
+    	return new QuestionAdapter(getActivity(), questionList);
+    }
+    
+    private OnItemClickListener detailQuestionListener = new OnItemClickListener() {
+		@Override
+		public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
+			Intent i = new Intent(getActivity(), QuestionActivity.class);
+			Bundle args = new Bundle();
+	        args.putInt(MainProvider.KEY_OID_QUESTION, Integer.parseInt(qAdapter.getItem(position).get(MainProvider.KEY_OID)));
+	        i.putExtra(MainProvider.KEY_OID_QUESTION, Integer.parseInt(qAdapter.getItem(position).get(MainProvider.KEY_OID)));
+			getActivity().startActivity(i);
+			getActivity().overridePendingTransition(0, 0);
+		}
+    };
+    
+	public void loadQuestionList(LayoutInflater inflater, ViewGroup container){
+
+		rootView = inflater.inflate(R.layout.question_list, container, false);
+    	qList = (ListView)rootView.findViewById(R.id.list);
+    	mSearchView = (SearchView)rootView.findViewById(R.id.search_view);
     	
-    	qAdapter = new QuestionAdapter(getActivity(), questionList);
+    	qAdapter = getQuestionAdapter();
+
     	qList.setAdapter(qAdapter);
     	qList.setTextFilterEnabled(true);
+    	qList.setOnItemClickListener(detailQuestionListener);
     	
     	setupSearchView();
     	
@@ -191,18 +245,37 @@ public class QuestionFragment extends Fragment{
         	flipit();
         }
     };
-    
+
     private OnClickListener editPlayListListener = new OnClickListener() {
         public void onClick(View v) {
-        	//pAdapter
-        	//bList.removeAllViews();
-        	//bList.setAdapter(pAdapter);
+        	qAdapterForPlayList = getQuestionAdapter();
+        	bList.setAdapter(qAdapterForPlayList);
+        	bList.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
+        	bList.setMultiChoiceModeListener(new ModeCallback());
+        	bList.setItemChecked(0, true);
+        	playlist_menu.setVisibility(View.GONE);
+        }
+    };
+    
+    private OnClickListener emptyPlayListListener = new OnClickListener() {
+        public void onClick(View v) {
+        	emptyPlayList(bList ,currentPlayList);
+        }
+    };
+    
+    private OnClickListener delPlayListListener = new OnClickListener() {
+        public void onClick(View v) {
+        	delPlayList(pList ,currentPlayList);
+        	flipit();
         }
     };
     
     private OnItemClickListener detailPlayListListener = new OnItemClickListener() {
 		@Override
 		public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
+			currentPlayList = Long.parseLong(pAdapter.getItem(position).get(MainProvider.KEY_OID));
+			qAdapterForPlayList = getQuestionAdapterForPlayList(currentPlayList);
+        	bList.setAdapter(qAdapterForPlayList);
 			flipit();
 		}
     };
@@ -217,25 +290,27 @@ public class QuestionFragment extends Fragment{
 				
 		fLayout = (LinearLayout)rootView.findViewById(R.id.playlist_front);
 		bLayout = (LinearLayout)rootView.findViewById(R.id.playlist_back);
+		playlist_menu = (LinearLayout)rootView.findViewById(R.id.playlist_menu);
 		
-    	qList = (ListView)rootView.findViewById(R.id.list);
+    	pList = (ListView)rootView.findViewById(R.id.list);
     	bList = (ListView)rootView.findViewById(R.id.list_back);
-    	questionList = new ArrayList<HashMap<String, String>>();
+    	ArrayList<HashMap<String, String>> playlistList = new ArrayList<HashMap<String, String>>();
    	
     	mp = new MainProvider(getActivity());
     	mp.open();
     	result = mp.fetchAllPlayList();
     	while(result.moveToNext()){
-    		HashMap<String, String> value = new HashMap<String, String>();            	
+    		HashMap<String, String> value = new HashMap<String, String>();
+    		value.put(MainProvider.KEY_OID, result.getString(0));
         	value.put(MainProvider.KEY_TITLE, result.getString(1));
-        	questionList.add(value);
+        	playlistList.add(value);
 		}
     	mp.close();
     	
-    	pAdapter = new PlayListAdapter(getActivity(), questionList);
-    	qList.setAdapter(pAdapter);
-    	bList.setAdapter(pAdapter);
-    	qList.setOnItemClickListener(detailPlayListListener);
+    	pAdapter = new PlayListAdapter(getActivity(), playlistList);
+    	
+    	pList.setAdapter(pAdapter);
+    	pList.setOnItemClickListener(detailPlayListListener);
     	
     	// complete
     	TextView btnCompletePlayList = (TextView)rootView.findViewById(R.id.btn_complete_playlist);
@@ -244,6 +319,14 @@ public class QuestionFragment extends Fragment{
     	// edit
     	TextView btnEditPlayList = (TextView)rootView.findViewById(R.id.btn_edit_playlist);
     	btnEditPlayList.setOnClickListener(editPlayListListener);
+    	
+    	// empty
+    	TextView btnEmptyPlayList = (TextView)rootView.findViewById(R.id.btn_empty_playlist);
+    	btnEmptyPlayList.setOnClickListener(emptyPlayListListener);
+    	
+    	// delete
+    	TextView btnDelPlayList = (TextView)rootView.findViewById(R.id.btn_del_playlist);
+    	btnDelPlayList.setOnClickListener(delPlayListListener);
 	}
 	
 	private OnScrollListener osl = new OnScrollListener() {
@@ -256,9 +339,9 @@ public class QuestionFragment extends Fragment{
 		public void onScroll(AbsListView view, int firstVisibleItem,
 	            int visibleItemCount, int totalItemCount) {
 	        if (mReady) {
-	            //char firstLetter = questionList.get(firstVisibleItem).get(MainActivity.KEY_QUESTION).charAt(0);
+	            //char firstLetter = questionList.get(firstVisibleItem).get(MainProvider.KEY_QUESTION).charAt(0);
 	        	HashMap<String, String> firstItem = (HashMap<String, String>)qList.getAdapter().getItem(firstVisibleItem); 
-	        	char firstLetter = firstItem.get(MainActivity.KEY_QUESTION).charAt(0);
+	        	char firstLetter = firstItem.get(MainProvider.KEY_QUESTION).charAt(0);
 	        	
 	            if (!mShowing && firstLetter != mPrevLetter) {
 
@@ -305,7 +388,7 @@ public class QuestionFragment extends Fragment{
 	};
 	
 	// Dialog
-	public static class NewPlayListDialogFragment extends DialogFragment {
+	public class NewPlayListDialogFragment extends DialogFragment {
 
         @Override
         public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -318,9 +401,9 @@ public class QuestionFragment extends Fragment{
                        public void onClick(DialogInterface dialog, int id) {
                     	   EditText et = (EditText)NewPlayListDialogFragment.this.getDialog().findViewById(R.id.playlist);
                     	   String titleOfPlayList = et.getText().toString();
-                    	   int oid_library = 1;
+                    	   long oid_library = 1;
                     	   if( titleOfPlayList != null && titleOfPlayList.length() > 0 ) {
-                    		   NewPlayListDialogFragment.this.createNewPlayList(titleOfPlayList, oid_library);
+                    		   createPlayList(titleOfPlayList, oid_library);
                     	   }
                        }
                    })
@@ -332,14 +415,7 @@ public class QuestionFragment extends Fragment{
             return builder.create();
         }
     
-    	public void createNewPlayList(String title, int oid_library)
-    	{
-    		MainProvider mp = new MainProvider(getActivity());
-        	mp.open();
-        	mp.insertPlayList(title, oid_library);
-        	mp.close();    	
-    	}
-    	
+
 	}
 	
 	// flip
@@ -370,4 +446,97 @@ public class QuestionFragment extends Fragment{
         });
         visToInvis.start();
     }
+	
+	// multiselect
+	private class ModeCallback implements ListView.MultiChoiceModeListener {
+		@Override
+		public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+			// TODO Auto-generated method stub
+			MenuInflater inflater = getActivity().getMenuInflater();
+            inflater.inflate(R.menu.playlist, menu);
+			return true;
+		}
+        public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+            return true;
+        }
+
+        public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+        	
+        	switch(item.getItemId()) {
+        	case R.id.action_ok:
+        		setPlayList(bList);
+        		mode.finish();
+        		break;
+        	}
+        		
+            return true;
+        }
+
+        public void onDestroyActionMode(ActionMode mode) {
+        	playlist_menu.setVisibility(View.VISIBLE);
+    		qAdapterForPlayList = getQuestionAdapterForPlayList(currentPlayList);
+        	bList.setAdapter(qAdapterForPlayList);        	
+        }
+
+        public void onItemCheckedStateChanged(ActionMode mode,
+                int position, long id, boolean checked) {
+        	int c = bList.getCheckedItemCount();
+        }
+        
+    }
+	
+	public void setPlayList(ListView v) {
+		mp = new MainProvider(getActivity());
+		mp.open();
+		SparseBooleanArray checked = v.getCheckedItemPositions();
+		int i, key;
+		HashMap<String, String> data;
+		mp.deletePlayListQustion(currentPlayList);
+		for(i=0; i<checked.size(); i++) {
+			key = checked.keyAt(i);
+			if(checked.get(key)){
+				data = qAdapterForPlayList.getItem(key);
+				mp.insertPlayListQustion(currentPlayList,  Integer.parseInt(data.get(MainProvider.KEY_OID)));
+			}
+		}
+		mp.close();
+	}
+
+	public void createPlayList(String title, long oid_library)
+	{
+		MainProvider mp = new MainProvider(getActivity());
+    	mp.open();
+    	long oid_playlist = mp.insertPlayList(title, oid_library);
+    	mp.close();
+    	
+    	currentPlayList = oid_playlist;
+		qAdapterForPlayList = getQuestionAdapterForPlayList(currentPlayList);
+    	bList.setAdapter(qAdapterForPlayList);
+    	HashMap<String, String> item = new HashMap<String, String>();
+    	item.put(MainProvider.KEY_TITLE, title);
+    	PlayListAdapter adapter = (PlayListAdapter)pList.getAdapter();
+    	adapter.setItem(item);
+		flipit();
+	}
+	
+	public void emptyPlayList(ListView v, long oid_playlist) {
+		mp = new MainProvider(getActivity());
+		mp.open();
+		mp.deletePlayListQustion(oid_playlist);
+		mp.close();
+		QuestionAdapter adapter = (QuestionAdapter)v.getAdapter();
+		adapter.removeAllItem();
+		v.setAdapter(adapter);
+	}
+	
+	public void delPlayList(ListView v, long oid_playlist) {
+		mp = new MainProvider(getActivity());
+		mp.open();
+		mp.deletePlayListQustion(oid_playlist);
+		mp.deletePlayList(oid_playlist);
+		mp.close();
+		PlayListAdapter adapter = (PlayListAdapter)v.getAdapter();
+		adapter.removeItemByOid(oid_playlist);
+		v.setAdapter(adapter);
+	}
 }

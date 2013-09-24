@@ -37,9 +37,17 @@ public class QuestionAdapter extends BaseAdapter implements Filterable{
 	}
 
 	@Override
-	public Object getItem(int position) {
+	public HashMap<String, String> getItem(int position) {
 		// TODO Auto-generated method stub
 		return data.get(position);
+	}
+	
+	public void removeItem(int position) {
+		data.remove(position);
+	}
+	
+	public void removeAllItem() {
+		data.clear();
 	}
 
 	@Override
@@ -60,13 +68,11 @@ public class QuestionAdapter extends BaseAdapter implements Filterable{
 		
 		HashMap<String, String> question = new HashMap<String, String>();
 		question = data.get(position);
-		
-		title.setText(question.get(MainActivity.KEY_QUESTION));
-		persent.setText(question.get(MainActivity.KEY_PERSENT));
-		state.setText(question.get(MainActivity.KEY_STATE));
-		
-		//vi.setBackgroundColor((position & 1) == 1 ? Color.WHITE : Color.rgb(172,172,172) );
 
+		title.setText(question.get(MainProvider.KEY_QUESTION));
+		persent.setText(question.get(MainProvider.KEY_PERSENT));
+		state.setText(question.get(MainProvider.KEY_STATE));
+		
 		return vi;
 	}
 	
@@ -98,7 +104,7 @@ public class QuestionAdapter extends BaseAdapter implements Filterable{
 				ArrayList<HashMap<String, String>> nData = new ArrayList<HashMap<String, String>>();
 				
 				for (HashMap<String, String> d : fData) {
-					if(d.get(MainActivity.KEY_QUESTION).toUpperCase().startsWith(constraint.toString().toUpperCase()))
+					if(d.get(MainProvider.KEY_QUESTION).toUpperCase().startsWith(constraint.toString().toUpperCase()))
 						nData.add(d);
 				}
 

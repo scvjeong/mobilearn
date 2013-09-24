@@ -41,6 +41,7 @@
 	    android:visibility="gone" >
 
 	    <LinearLayout
+	        android:id="@+id/playlist_menu"
 	        android:layout_width="match_parent"
 	        android:layout_height="wrap_content"
 	        android:paddingTop="5dp"
@@ -89,7 +90,8 @@
 	        android:layout_width="fill_parent"
 	        android:layout_height="wrap_content"
 	        android:divider="#acacac"
-	        android:dividerHeight="1dp" >
+	        android:dividerHeight="1dp"
+	        android:background="?android:attr/activatedBackgroundIndicator" >
 	    </ListView>
 
 	</LinearLayout>

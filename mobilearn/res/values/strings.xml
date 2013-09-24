@@ -24,6 +24,7 @@
     <string name="action_home">Home</string>
     <string name="action_list">List</string>
     <string name="action_playlist">PlayList</string>
+    <string name="action_ok">OK</string>
     
     <string name="action_toggle">Toggle indicator</string>
     <string name="action_add_item">Add item</string>
