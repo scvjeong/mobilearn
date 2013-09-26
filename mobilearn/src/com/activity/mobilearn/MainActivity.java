@@ -88,7 +88,6 @@ public class MainActivity extends Activity{
                 R.layout.menu_list_item, mList));
         mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
         
-        lockScreenService = startService(new Intent(this, LockScreenService.class));
         selectItem(0);
     }
     
@@ -110,7 +109,7 @@ public class MainActivity extends Activity{
         Bundle args = new Bundle();
         args.putInt(MainFragment.MENU_NUMBER, position);
         fragment.setArguments(args);
-
+        
         FragmentManager fragmentManager = getFragmentManager();
         fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
         

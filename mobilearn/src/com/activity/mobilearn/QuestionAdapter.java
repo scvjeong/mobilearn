@@ -65,6 +65,7 @@ public class QuestionAdapter extends BaseAdapter implements Filterable{
 		TextView title = (TextView)vi.findViewById(R.id.title_of_question);
 		TextView persent = (TextView)vi.findViewById(R.id.persent);
 		TextView state = (TextView)vi.findViewById(R.id.state);
+		TextView score = (TextView)vi.findViewById(R.id.score);
 		
 		HashMap<String, String> question = new HashMap<String, String>();
 		question = data.get(position);
@@ -72,6 +73,7 @@ public class QuestionAdapter extends BaseAdapter implements Filterable{
 		title.setText(question.get(MainProvider.KEY_QUESTION));
 		persent.setText(question.get(MainProvider.KEY_PERSENT));
 		state.setText(question.get(MainProvider.KEY_STATE));
+		score.setText(question.get(MainProvider.KEY_SCORE));
 		
 		return vi;
 	}

@@ -32,7 +32,7 @@ public class LockScreenActivity extends Activity implements OnClickListener{
 	private static int QUESTION_NUM = 50;
 	private static int REPLY_MAX_NUM = 4;
 	private static int NO_ANSWER_MAX_NUM = 100;
-	private int answerNum;
+	private int answerNum, score;
 	private boolean is_first = true;
 	private long oid_question;
 	private Vibrator vibrator = null;
@@ -45,6 +45,11 @@ public class LockScreenActivity extends Activity implements OnClickListener{
 		
 		vibrator = (Vibrator)getSystemService(Context.VIBRATOR_SERVICE);
 		
+		String time = android.text.format.DateFormat.format("yyyy-MM-dd aa h:mm", System.currentTimeMillis()).toString();
+
+		date = (TextView)findViewById(R.id.date);
+		date.setText(time);
+		
         mp = new MainProvider(this);
         mp.open();
 		
@@ -55,8 +60,9 @@ public class LockScreenActivity extends Activity implements OnClickListener{
 		Random random = new Random();
 		int num = random.nextInt(QUESTION_NUM);
 		if(result.move(num)){
-			q1.setText( result.getString(1) );
 			this.oid_question = result.getInt(0);
+			q1.setText( result.getString(1) );
+			this.score = result.getInt(2);
 			mp.updateCountQuestion(this.oid_question);
 			
 			int i, idx = 0;
@@ -86,12 +92,7 @@ public class LockScreenActivity extends Activity implements OnClickListener{
 			mp.close();
 			finish();
 		}
-		
-		String time = android.text.format.DateFormat.format("yyyy-MM-dd aa h:mm", System.currentTimeMillis()).toString();
 
-		date = (TextView)findViewById(R.id.date);
-		date.setText(time);
-		
 		mp.close();
 	}
 	
@@ -131,21 +132,33 @@ public class LockScreenActivity extends Activity implements OnClickListener{
 	
 	@Override
 	public void onClick(View v) {
-		if( this.makingAnswerClickListener(v.getId()) )
+		if( this.makingAnswerClickListener(v.getId()) ) {
 			finish();
+			
+		}
 	}
 	
 	public boolean makingAnswerClickListener(int id)
 	{
 		mp.open();
 		boolean ca = false;
+		int correct_flag; // incorrect : 0, correct : 1, skip : 2
+		int incorrect_score;
+		double reg_date = Double.parseDouble(android.text.format.DateFormat.format("yyyyMMddkkmmss", System.currentTimeMillis()).toString());
+		
 		if( id == this.answerNum ) {
 			Toast.makeText(this, "correct", Toast.LENGTH_SHORT).show();
 			ca = true;
 			if(this.is_first) {
+				correct_flag = 1;
 				mp.updateCorrectQuestion(this.oid_question);
+				mp.insertLog(this.oid_question, correct_flag, this.score, reg_date);
 			}
 		} else {
+			correct_flag = 0;
+			incorrect_score = Math.round(this.score*2/3) * -1;
+			mp.insertLog(this.oid_question, correct_flag, incorrect_score, reg_date);
+			
 			long pattern[] = new long[] {0, 200, 100, 200};
 			Cursor result = mp.fetchSetting("vibration");
 			if(result.getCount() < 1)

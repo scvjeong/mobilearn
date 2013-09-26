@@ -72,6 +72,20 @@ public class MainFragment extends Fragment implements LoaderCallbacks<JSONObject
     }
 
     @Override
+    public void onResume() {
+    	// TODO Auto-generated method stub
+    	super.onResume();
+    	int i = getArguments().getInt(MENU_NUMBER);
+    	switch(i){
+        case 0:
+        	mp.open();
+        	createMenuMainSetScore(rootView, mp);
+        	mp.close();
+        	break;
+    	}
+    }
+    
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
 
@@ -81,24 +95,7 @@ public class MainFragment extends Fragment implements LoaderCallbacks<JSONObject
         
         switch(i){
         case 0:
-       		rootView = inflater.inflate(R.layout.fragment_menu, container, false);
-       		TextView serviceState = (TextView)rootView.findViewById(R.id.service_state);
-       		if(MainActivity.lockScreenService != null)
-       			serviceState.setText("ON");
-       		else
-       			serviceState.setText("OFF");
-       		LinearLayout layoutChartRadar = (LinearLayout) rootView.findViewById(R.id.layout_chart_radar);
-       		float chartData[] = {30, 26, 15, 28, 24};
-       		View chartRaderView = new ChartRaderView(getActivity(), chartData);
-       		chartRaderView.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
-       		layoutChartRadar.addView(chartRaderView);
-       		
-       		LinearLayout layoutChartLine = (LinearLayout) rootView.findViewById(R.id.layout_chart_line);
-    		float chartData2[] = {200, 100, 50, 120, 100, 180, 160, 105};
-       		View chartLineView = new ChartLineView(getActivity(), chartData2);
-       		chartLineView.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
-       		layoutChartLine.addView(chartLineView);
-       		
+        	createMenuMain(inflater, container);
        		break;
         case 1:
         	createMenuMY(inflater, container);
@@ -214,11 +211,12 @@ public class MainFragment extends Fragment implements LoaderCallbacks<JSONObject
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			if(action ==  "question"){
+			if(action.equals("question")){
 				cm.setQuestions(json);
-			} else if(action == "answer"){
+				//cm.setUpdateQuestions(json);
+			} else if(action.equals("answer")){
 				cm.setAnswers(json);
-			} else if(action == "library"){
+			} else if(action.equals("library")){
 				cm.setLibrary(json);
 			}
 		}
@@ -229,7 +227,73 @@ public class MainFragment extends Fragment implements LoaderCallbacks<JSONObject
 		// TODO Auto-generated method stub
 		
 	}
-
+	
+	/** createMenuMain start **/
+	
+	public void createMenuMain(LayoutInflater inflater, ViewGroup container){
+		rootView = inflater.inflate(R.layout.fragment_menu, container, false);
+   		
+   		Cursor result;
+   		mp = new MainProvider(getActivity());
+   		mp.open();
+   		
+   		// lock screen setting
+   		TextView serviceState = (TextView)rootView.findViewById(R.id.service_state);
+   		result = mp.fetchSetting("lock_screen");
+    	if(result.getCount() < 1) {
+    		mp.insertSetting("lock_screen", "ON");
+    		MainActivity.lockScreenService = getActivity().startService(new Intent(getActivity(), LockScreenService.class));
+    		serviceState.setText("ON");
+    	} else if(result.move(0)) {
+    		if(result.getString(0).equals("ON") && MainActivity.lockScreenService == null) {
+    	    	serviceState.setText("ON");
+    	    	MainActivity.lockScreenService = getActivity().startService(new Intent(getActivity(), LockScreenService.class));
+    		} else if(result.getString(0).equals("ON") && MainActivity.lockScreenService != null) {
+    			serviceState.setText("ON");
+    		} else if(result.getString(0).equals("OFF") && MainActivity.lockScreenService == null) {
+    			serviceState.setText("OFF");
+    		} else if(result.getString(0).equals("OFF") && MainActivity.lockScreenService != null) {
+    			serviceState.setText("OFF");
+    			Intent intent = new Intent();
+    			intent.setComponent(MainActivity.lockScreenService);
+				getActivity().stopService(intent);
+				MainActivity.lockScreenService = null;
+    		}
+    	} else {
+    		serviceState.setText("OFF");
+    	}
+    	
+    	createMenuMainSetScore(rootView, mp);
+   		
+   		LinearLayout layoutChartRadar = (LinearLayout) rootView.findViewById(R.id.layout_chart_radar);
+   		float chartData[] = {30, 26, 15, 28, 24};
+   		View chartRaderView = new ChartRaderView(getActivity(), chartData);
+   		chartRaderView.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+   		layoutChartRadar.addView(chartRaderView);
+   		
+   		LinearLayout layoutChartLine = (LinearLayout) rootView.findViewById(R.id.layout_chart_line);
+		float chartData2[] = {200, 100, 50, 120, 100, 180, 160, 105};
+   		View chartLineView = new ChartLineView(getActivity(), chartData2);
+   		chartLineView.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+   		layoutChartLine.addView(chartLineView);
+   		
+   		mp.close();
+	}
+	
+	public void createMenuMainSetScore(View v, MainProvider mp){
+		// score
+   		TextView scoreView = (TextView)rootView.findViewById(R.id.score_main);
+   		long old_library = 16391;
+   		int score = 0;
+   		
+   		Cursor result = mp.fetchScoreForMain(old_library);
+   		if(result.move(0))
+  			score = result.getInt(0);
+   		scoreView.setText(String.valueOf(score));
+	}
+	
+	/** createMenuMain end **/
+	
 	public void createMenuMY(LayoutInflater inflater, ViewGroup container){
 		rootView = inflater.inflate(R.layout.view_pager, container, false);
 		
@@ -335,7 +399,6 @@ public class MainFragment extends Fragment implements LoaderCallbacks<JSONObject
 		    			mp.updateSettingItem("time_" + i, "OFF");
 		    			v.setBackgroundColor(Color.rgb(255, 255, 255));
 		    		}
-		    		Log.e("touch","value : " + value);
 		    	}
 				mp.close();
 
@@ -420,11 +483,6 @@ public class MainFragment extends Fragment implements LoaderCallbacks<JSONObject
     		}
     	}
     	
-    	result = mp.fetchAllSetting();
-    	while(result.moveToNext()){
-    		Log.e("result","item : " + result.getString(0) + " | value : " + result.getString(1));
-    	}
-    	
     	mp.close();
     	
     	sls.setOnClickListener(new View.OnClickListener() {
@@ -433,7 +491,7 @@ public class MainFragment extends Fragment implements LoaderCallbacks<JSONObject
 				// TODO Auto-generated method stub
 				mp.open();
 				String s = ((TextView)v).getText().toString();
-				if(s == "OFF"){
+				if(s.equals("OFF")){
 					MainActivity.lockScreenService = getActivity().startService(new Intent(getActivity(), LockScreenService.class));
 					//lockScreenService = getActivity().startService(new Intent(getActivity(), LoadingService.class));
     				mp.updateSettingItem("lock_screen", "ON");
@@ -458,7 +516,7 @@ public class MainFragment extends Fragment implements LoaderCallbacks<JSONObject
 				// TODO Auto-generated method stub
 				mp.open();
 				String s = ((TextView)v).getText().toString();
-				if(s == "OFF"){
+				if(s.equals("OFF")){
     				mp.updateSettingItem("vibration", "ON");
     				((TextView)v).setText("ON");
     			} else{

@@ -140,11 +140,12 @@ public class MainProvider {
         mDbHelper.close();
     }
  
-    public long createQuestion(int oid, String question, int oid_library) {
+    public long createQuestion(int oid, String question, long oid_library, int score) {
         ContentValues initialValues = new ContentValues();
         initialValues.put(KEY_OID, oid);
         initialValues.put(KEY_QUESTION, question);
         initialValues.put(KEY_OID_LIBRARY, oid_library);
+        initialValues.put(KEY_SCORE, score);
         return mDb.insert(TABLE_QUESTION, null, initialValues);
     }
  
@@ -158,7 +159,8 @@ public class MainProvider {
     			+ KEY_QUESTION + ", " 
     			+ KEY_COUNT + ", "
     			+ KEY_CORRECT_ANSWER_CNT + ", "
-    			+ KEY_STATE + " "
+    			+ KEY_STATE + ", "
+    			+ KEY_SCORE + " "
     			+ " FROM " + TABLE_QUESTION
     			+ " WHERE  " + KEY_OID_LIBRARY + " = " + oid_library
     			+ " ORDER BY " + KEY_QUESTION + " ASC";
@@ -183,7 +185,7 @@ public class MainProvider {
     }
  
     public Cursor fetchQuestion(long oid_library, int limit) throws SQLException {
-    	String sql = "SELECT oid, question " 
+    	String sql = "SELECT oid, question, score " 
     			+ " FROM " + TABLE_QUESTION
     			+ " WHERE "+ KEY_OID_LIBRARY +" = " + oid_library
     			+ " ORDER BY count ASC, oid ASC"
@@ -204,6 +206,15 @@ public class MainProvider {
             mCursor.moveToFirst();
         }
         return mCursor;
+    }
+    
+    public boolean updateQuestion(long oid, String question, long oid_library, int score) {
+        ContentValues args = new ContentValues();
+        args.put(KEY_OID, oid);
+        args.put(KEY_QUESTION, question);
+        args.put(KEY_OID_LIBRARY, oid_library);
+        args.put(KEY_SCORE, score);        
+        return mDb.update(TABLE_QUESTION, args, KEY_OID + "=" + oid, null) > 0;
     }
     
     public void updateCountQuestion(long oid) {
@@ -372,12 +383,28 @@ public class MainProvider {
         return mCursor;
     }
     
-    public long insertLog(long oid_question, int correct_flag, int score, String reg_date) {
+    public long insertLog(long oid_question, int correct_flag, int score, double reg_date) {
         ContentValues initialValues = new ContentValues();
         initialValues.put(KEY_OID_QUESTION, oid_question);
         initialValues.put(KEY_CORRECT_FLAG, correct_flag);
         initialValues.put(KEY_SCORE, score);
         initialValues.put(KEY_REG_DATE, reg_date);
-        return mDb.insert(TABLE_PLAYLIST_QUESTION, null, initialValues);
+        return mDb.insert(TABLE_LOG, null, initialValues);
+    }
+    
+    public Cursor fetchScoreForMain(long old_library) {
+    	String sql = "SELECT SUM(" + TABLE_LOG + "." +  KEY_SCORE + ")"
+    			+ " FROM " + TABLE_LOG
+    			+ " INNER JOIN " + TABLE_QUESTION
+    			+ " ON " + TABLE_LOG + "." + KEY_OID_QUESTION + " = " + TABLE_QUESTION + "." + KEY_OID
+    			+ " INNER JOIN " + TABLE_LIBRARY
+    			+ " ON " + TABLE_QUESTION + "." + KEY_OID_LIBRARY + " = " + TABLE_LIBRARY + "." + KEY_OID
+    			+ " WHERE " + TABLE_LIBRARY + "."+ KEY_OID +" = " + old_library;
+    			
+        Cursor mCursor = mDb.rawQuery(sql, null);
+        if (mCursor != null) {
+            mCursor.moveToFirst();
+        }
+        return mCursor;
     }
 }

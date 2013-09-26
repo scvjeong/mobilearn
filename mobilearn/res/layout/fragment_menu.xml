@@ -72,7 +72,7 @@
 	            android:orientation="vertical" >
 				
 	            <TextView
-	                android:id="@+id/textView1"
+	                android:id="@+id/skip_main"
 	                android:layout_width="match_parent"
 	                android:layout_height="wrap_content"
 	                android:layout_weight="1"
@@ -83,7 +83,7 @@
 	                android:textSize="40dip" />
 	            
 	            <TextView
-	                android:id="@+id/textView1"
+	                android:id="@+id/skip_main_text"
 	                android:layout_width="match_parent"
 	                android:layout_height="wrap_content"
 	                android:gravity="bottom|right"
@@ -102,7 +102,7 @@
 	            android:orientation="vertical" >
 				
 	            <TextView
-	                android:id="@+id/textView1"
+	                android:id="@+id/score_main"
 	                android:layout_width="match_parent"
 	                android:layout_height="wrap_content"
 	                android:layout_weight="1"

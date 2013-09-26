@@ -11,35 +11,68 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginLeft="20dp"
+        android:layout_marginBottom="5dp"
         android:text="Jeong"
         android:textColor="#040404"
         android:textSize="20dip"
         android:typeface="sans" />
 
-    <!-- Rightend Duration -->
-
-    <TextView
-        android:id="@+id/persent"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_alignTop="@+id/title_of_question"
-        android:layout_marginRight="20dp"
-        android:gravity="right"
-        android:text="0/0"
-        android:textSize="10dip"
-        android:textColor="#040404" />
-
     <TextView
         android:id="@+id/state"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_below="@+id/persent"
-        android:layout_marginRight="20dp"
-        android:gravity="right"
-        android:text="초기학습"
-        android:textSize="10dip"
-        android:textColor="#040404" />
+        android:layout_alignLeft="@+id/title_of_question"
+        android:layout_below="@+id/title_of_question"        
+        android:text="기초학습"
+        android:textColor="#acacac"
+        android:textSize="10dip" />
+
+    <TextView
+        android:id="@+id/delimiter_1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/state"
+        android:layout_alignBottom="@+id/state"
+        android:layout_toRightOf="@+id/state"
+        android:paddingLeft="5dp"
+        android:paddingRight="5dp"
+        android:text="|"
+        android:textColor="#acacac"
+        android:textSize="10dip" />
+    
+    <TextView
+        android:id="@+id/persent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/delimiter_1"
+        android:layout_alignBottom="@+id/delimiter_1"
+        android:layout_toRightOf="@+id/delimiter_1"    
+        android:text="100%"
+        android:textColor="#acacac"
+        android:textSize="10dip" />
+
+    <TextView
+        android:id="@+id/delimiter_2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/persent"
+        android:layout_alignBottom="@+id/persent"
+        android:layout_toRightOf="@+id/persent"
+        android:paddingLeft="5dp"
+        android:paddingRight="5dp"
+        android:text="|"
+        android:textColor="#acacac"
+        android:textSize="10dip" />
+    
+    <TextView
+        android:id="@+id/score"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/delimiter_2"
+        android:layout_alignBottom="@+id/delimiter_2"
+        android:layout_toRightOf="@+id/delimiter_2"    
+        android:text="+3"
+        android:textColor="#acacac"
+        android:textSize="10dip" />
 
 </RelativeLayout>

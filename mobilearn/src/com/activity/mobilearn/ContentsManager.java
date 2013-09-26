@@ -32,8 +32,36 @@ public class ContentsManager {
 	            // Storing each json item in variable
 	            int oid  = Integer.parseInt(c.getString("oid"));
 	            String question  = c.getString("question");
-	            int oid_library  = Integer.parseInt(c.getString("oid_library"));
-	            mp.createQuestion(oid, question, oid_library);
+	            long oid_library  = Long.parseLong(c.getString("oid_library"));
+	            int score  = Integer.parseInt(c.getString("score"));
+	            mp.createQuestion(oid, question, oid_library, score);
+	        }
+	    } catch (JSONException e) {
+	        e.printStackTrace();
+	    } finally{
+        	mp.close();
+        }      
+	}
+	
+	public void setUpdateQuestions(JSONObject json){
+		JSONArray contacts = null;
+		mp = new MainProvider(mCtx);
+		mp.open();
+		
+	    try {
+	        // Getting Array of Contacts
+	        contacts = json.getJSONArray("question_list");
+	         
+	        // looping through All Contacts
+	        for(int j = 0; j < contacts.length(); j++){
+	            JSONObject c = contacts.getJSONObject(j);
+	             
+	            // Storing each json item in variable
+	            int oid  = Integer.parseInt(c.getString("oid"));
+	            String question  = c.getString("question");
+	            long oid_library  = Long.parseLong(c.getString("oid_library"));
+	            int score  = Integer.parseInt(c.getString("score"));
+	            mp.updateQuestion(oid, question, oid_library, score);
 	        }
 	    } catch (JSONException e) {
 	        e.printStackTrace();

@@ -37,7 +37,10 @@
             android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
             android:screenOrientation="portrait">
         </activity>
-        <activity android:name="com.activity.mobilearn.QuestionActivity"></activity>
+        <activity 
+            android:name="com.activity.mobilearn.QuestionActivity"
+            android:theme="@android:style/Theme.NoTitleBar.Fullscreen" >
+        </activity>
         <activity android:name="SimpleServiceActivity"></activity>
     	<service android:name="com.service.mobilearn.LockScreenService">
     	    <intent-filter>
