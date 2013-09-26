@@ -317,13 +317,31 @@ public class MainFragment extends Fragment implements LoaderCallbacks<JSONObject
 		@Override
 		public boolean onTouch(View v, MotionEvent event) {
 			// TODO Auto-generated method stub
-			//TextView tv = (TextView)v;
-			/*
-			if(event.getAction() == MotionEvent.ACTION_DOWN && !tv.getText().equals("")) {
+
+			if(event.getAction() == MotionEvent.ACTION_DOWN ) {
 				v.setBackgroundColor(Color.rgb(166, 156, 142));
+				TextView tv = (TextView)v;
+				String i = tv.getText().toString();
+				MainProvider mp = new MainProvider(getActivity());
+				mp.open();
+				Cursor result = mp.fetchSetting("time_" + i);
+		    	if(result.move(0)) {
+		    		String value = result.getString(0);
+		    		if(value.equals("OFF")){
+		    			mp.updateSettingItem("time_" + i, "ON");
+		    			v.setBackgroundColor(Color.rgb(166, 156, 142));
+		    		}
+		    		else{
+		    			mp.updateSettingItem("time_" + i, "OFF");
+		    			v.setBackgroundColor(Color.rgb(255, 255, 255));
+		    		}
+		    		Log.e("touch","value : " + value);
+		    	}
+				mp.close();
+
 				return true;
 			} 
-			*/
+			
 			return false;
 		}
     }
@@ -335,23 +353,40 @@ public class MainFragment extends Fragment implements LoaderCallbacks<JSONObject
 		TextView sls = (TextView)rootView.findViewById(R.id.setting_lock_screen);
 		TextView sv = (TextView)rootView.findViewById(R.id.setting_vibration);
 		TableLayout timeTable = (TableLayout)rootView.findViewById(R.id.time_table);
-		timeTable.setOnTouchListener(touchListener);
-		int a = timeTable.getChildCount();
-		Log.e("a","a : " + a);
-		int i, j;
+		
+		mp = new MainProvider(getActivity());
+    	mp.open();
+    	
+		int i, j, idx=1;
 		TableRow tr;
 		TextView td;
 		for(i=0; i<timeTable.getChildCount(); i++) {
 			tr = (TableRow)timeTable.getChildAt(i);
 			for(j=0; j<tr.getChildCount(); j++) {
 				td = (TextView)tr.getChildAt(j);
-				td.setOnTouchListener(touchListener);
+				if((i+1)!=timeTable.getChildCount()||(j+1)!=tr.getChildCount()) {
+					td.setOnTouchListener(touchListener);
+
+					result = mp.fetchSetting("time_" + idx);
+			    	if(result.getCount() < 1) {
+			    		mp.insertSetting("time_" + idx, "ON");
+			    		td.setBackgroundColor(Color.rgb(166, 156, 142));
+			    	} else if(result.move(0)) {
+			    		String value = result.getString(0);
+			    		if(value.equals("ON")){
+			    			mp.updateSettingItem("time_" + idx, "ON");
+			    			td.setBackgroundColor(Color.rgb(166, 156, 142));
+			    		}
+			    		else{
+			    			mp.updateSettingItem("time_" + idx, "OFF");
+			    			td.setBackgroundColor(Color.rgb(255, 255, 255));
+			    		}
+			    	}
+			    	idx++;
+				}
 			}
 		}
 		
-		mp = new MainProvider(getActivity());
-    	mp.open();
-    	
     	result = mp.fetchSetting("lock_screen");
     	if(result.getCount() < 1) {
     		mp.insertSetting("lock_screen", "ON");
@@ -384,27 +419,12 @@ public class MainFragment extends Fragment implements LoaderCallbacks<JSONObject
 				sv.setText("OFF");
     		}
     	}
-    	for(i=1; i<24; i++)
-    	{
-	    	result = mp.fetchSetting("time_" + i);
-	    	/*
-	    	if(result.getCount() < 1) {
-	    		mp.insertSetting("vibration", "ON");
-	    		sv.setText("ON");
-	    	}
-	    	else if(result.move(0)) {
-	    		String value = result.getString(0);
-	    		if(value.equals("ON")){
-	    			mp.updateSettingItem("vibration", "ON");
-	        		sv.setText("ON");
-	    		}
-	    		else{
-	    			mp.updateSettingItem("vibration", "OFF");
-					sv.setText("OFF");
-	    		}
-	    	}
-	    	*/
+    	
+    	result = mp.fetchAllSetting();
+    	while(result.moveToNext()){
+    		Log.e("result","item : " + result.getString(0) + " | value : " + result.getString(1));
     	}
+    	
     	mp.close();
     	
     	sls.setOnClickListener(new View.OnClickListener() {

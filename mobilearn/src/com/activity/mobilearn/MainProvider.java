@@ -20,6 +20,7 @@ public class MainProvider {
     public static final String KEY_NAME = "name";
     public static final String KEY_TYPE = "type";
     public static final String KEY_UPDATE_DATE = "update_date";
+    public static final String KEY_REG_DATE = "reg_date";
     public static final String KEY_IS_USE = "is_use";
     public static final String KEY_REPLY = "reply";
     public static final String KEY_ANSWER = "answer";
@@ -28,10 +29,13 @@ public class MainProvider {
     public static final String KEY_OID_QUESTION = "oid_question";
     public static final String KEY_OID_PLAYLIST = "oid_playlist";
     public static final String KEY_CORRECT_ANSWER_CNT = "correct_answer_cnt";
-    public static final String KEY_STATE = "state";
+    public static final String KEY_STATE = "state"; // user : 0, seller : 1
     public static final String KEY_ITEM = "item";
     public static final String KEY_VALUE = "value";
     public static final String KEY_TITLE = "title";
+    public static final String KEY_SCORE = "score";
+    public static final String KEY_CORRECT_FLAG = "correct_flag"; // incorrect : 0, correct : 1, skip : 2
+    
     
     private static final String TAG = "MainProvider";
  
@@ -50,12 +54,15 @@ public class MainProvider {
             + "reply text not null, answer integer not null, oid_question integer not null );";
     private static final String TABLE_QUESTION_CREATE = "create table questions (oid integer primary key not null, "
             + "question text not null, oid_library integer not null, count integer default 0, "
-    		+ "correct_answer_cnt integer default 0, state integer default 0);";
+    		+ "correct_answer_cnt integer default 0, state integer default 0, score integer default 0);";
     private static final String TABLE_LIBRARY_CREATE = "create table library (oid integer primary key not null, "
     		+ "name text not null, type integer not null, update_date text not null, "
     		+ "is_use integer not null);";
     private static final String TABLE_SETTING_CREATE = "create table setting (oid integer primary key autoincrement not null, "
             + "item text not null, value text not null );";
+    private static final String TABLE_LOG_CREATE = "create table logs (oid integer primary key autoincrement not null, "
+            + "oid_question integer not null, correct_flag integer not null, score integer default 0, "
+    		+ "reg_date integer test not null);";
  
     private static final String DATABASE_NAME = "mobilearn";
     private static final String TABLE_QUESTION = "questions";
@@ -64,6 +71,7 @@ public class MainProvider {
     private static final String TABLE_LIBRARY = "library";
     private static final String TABLE_ANSWER = "answers";
     private static final String TABLE_SETTING = "setting";
+    private static final String TABLE_LOG = "logs";
     private static final int DATABASE_VERSION = 2;
     private final Context mCtx;
  
@@ -81,6 +89,7 @@ public class MainProvider {
             db.execSQL(TABLE_QUESTION_CREATE);
             db.execSQL(TABLE_LIBRARY_CREATE);
             db.execSQL(TABLE_SETTING_CREATE);
+            db.execSQL(TABLE_LOG_CREATE);
         }
  
         @Override
@@ -93,6 +102,7 @@ public class MainProvider {
             db.execSQL("DROP TABLE IF EXISTS " + TABLE_LIBRARY);
             db.execSQL("DROP TABLE IF EXISTS " + TABLE_QUESTION);
             db.execSQL("DROP TABLE IF EXISTS " + TABLE_SETTING);
+            db.execSQL("DROP TABLE IF EXISTS " + TABLE_LOG);
             onCreate(db);
         }
         
@@ -103,6 +113,7 @@ public class MainProvider {
             db.execSQL("DROP TABLE IF EXISTS " + TABLE_LIBRARY);
             db.execSQL("DROP TABLE IF EXISTS " + TABLE_QUESTION);
             db.execSQL("DROP TABLE IF EXISTS " + TABLE_SETTING);
+            db.execSQL("DROP TABLE IF EXISTS " + TABLE_LOG);
             onCreate(db);
         }
     }
@@ -296,10 +307,16 @@ public class MainProvider {
     public boolean deleteSetting(String item) {
         return mDb.delete(TABLE_SETTING, KEY_ITEM + "= '" + item + "'", null) > 0;
     }
- 
     public Cursor fetchSetting(String item) throws SQLException {
         Cursor mCursor = mDb.query(true, TABLE_SETTING, new String[] { KEY_VALUE }, KEY_ITEM
                 + "= '" + item + "'", null, null, null, null, null);
+        if (mCursor != null) {
+            mCursor.moveToFirst();
+        }
+        return mCursor;
+    }
+    public Cursor fetchAllSetting() throws SQLException {
+        Cursor mCursor = mDb.query(true, TABLE_SETTING, new String[] { KEY_ITEM, KEY_VALUE }, null, null, null, null, null, null);
         if (mCursor != null) {
             mCursor.moveToFirst();
         }
@@ -353,5 +370,14 @@ public class MainProvider {
             mCursor.moveToFirst();
         }
         return mCursor;
+    }
+    
+    public long insertLog(long oid_question, int correct_flag, int score, String reg_date) {
+        ContentValues initialValues = new ContentValues();
+        initialValues.put(KEY_OID_QUESTION, oid_question);
+        initialValues.put(KEY_CORRECT_FLAG, correct_flag);
+        initialValues.put(KEY_SCORE, score);
+        initialValues.put(KEY_REG_DATE, reg_date);
+        return mDb.insert(TABLE_PLAYLIST_QUESTION, null, initialValues);
     }
 }
