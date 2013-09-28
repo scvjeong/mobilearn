@@ -331,7 +331,7 @@
                 android:textSize="20dp" />
 
             <TextView
-                android:id="@+id/textView2"
+                android:id="@+id/setting_skip"
                 android:layout_width="60dp"
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"

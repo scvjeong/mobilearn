@@ -29,9 +29,12 @@ import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.PopupMenu;
+import android.widget.PopupWindow;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.mobilearn.R;
 import com.service.mobilearn.LockScreenService;
@@ -43,13 +46,12 @@ public class MainFragment extends Fragment implements LoaderCallbacks<JSONObject
     private LibraryAdapter lAdapter;
 	private MainProvider mp;
 	private View rootView;
-	private ViewPager myPager;
-	private ViewPager mPager;
-	private PagerAdapter myPagerAdapter;
-	private PagerAdapter mPagerAdapter;
+	private ViewPager myPager, mPager, sPager;
+	private PagerAdapter myPagerAdapter, mPagerAdapter, sPagerAdapter;
 	
 	public static final String MENU_NUMBER = "menu_number";
-	public static final int MY_NUM_PAGES = 2;	
+	public static final int MY_NUM_PAGES = 2;
+	public static final int STATISTICS_NUM_PAGES = 2;
 	public static final int NUM_PAGES = 2;
 	
     static final String KEY_MARKET_NAME = "market_name";
@@ -80,6 +82,7 @@ public class MainFragment extends Fragment implements LoaderCallbacks<JSONObject
         case 0:
         	mp.open();
         	createMenuMainSetScore(rootView, mp);
+        	createMenuMainSetSkip(rootView, mp);
         	mp.close();
         	break;
     	}
@@ -102,6 +105,9 @@ public class MainFragment extends Fragment implements LoaderCallbacks<JSONObject
         	break;
         case 2:
         	createMenuLibrary(inflater, container);
+        	break;
+        case 3:
+        	createMenuStatistics(inflater, container);
         	break;
         case 4:
         	createMenuMarket(inflater, container);
@@ -267,13 +273,13 @@ public class MainFragment extends Fragment implements LoaderCallbacks<JSONObject
    		
    		LinearLayout layoutChartRadar = (LinearLayout) rootView.findViewById(R.id.layout_chart_radar);
    		float chartData[] = {30, 26, 15, 28, 24};
-   		View chartRaderView = new ChartRaderView(getActivity(), chartData);
+   		View chartRaderView = new ChartRaderView(getActivity(), chartData, "main");
    		chartRaderView.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
    		layoutChartRadar.addView(chartRaderView);
    		
    		LinearLayout layoutChartLine = (LinearLayout) rootView.findViewById(R.id.layout_chart_line);
 		float chartData2[] = {200, 100, 50, 120, 100, 180, 160, 105};
-   		View chartLineView = new ChartLineView(getActivity(), chartData2);
+   		View chartLineView = new ChartLineView(getActivity(), chartData2, "main");
    		chartLineView.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
    		layoutChartLine.addView(chartLineView);
    		
@@ -291,16 +297,35 @@ public class MainFragment extends Fragment implements LoaderCallbacks<JSONObject
   			score = result.getInt(0);
    		scoreView.setText(String.valueOf(score));
 	}
+
+	// skip
+	public void createMenuMainSetSkip(View v, MainProvider mp){
+
+   		TextView skipView = (TextView)rootView.findViewById(R.id.skip_main);
+   		String skip = "0";
+   		
+   		Cursor result = mp.fetchSetting("skip_current");
+   		if(result.move(0))
+  			skip = result.getString(0);
+   		skipView.setText(skip);
+	}
 	
 	/** createMenuMain end **/
 	
 	public void createMenuMY(LayoutInflater inflater, ViewGroup container){
 		rootView = inflater.inflate(R.layout.view_pager, container, false);
-		
         // Instantiate a ViewPager and a PagerAdapter.
 		myPager = (ViewPager) rootView.findViewById(R.id.pager);
 		myPagerAdapter = new MyPagerAdapter(getFragmentManager());
         myPager.setAdapter(myPagerAdapter);
+	}
+	
+	public void createMenuStatistics(LayoutInflater inflater, ViewGroup container){
+		rootView = inflater.inflate(R.layout.view_pager, container, false);
+        // Instantiate a ViewPager and a PagerAdapter.
+        sPager = (ViewPager) rootView.findViewById(R.id.pager);
+        sPagerAdapter = new StatisticsPagerAdapter(getFragmentManager());
+        sPager.setAdapter(sPagerAdapter);
 	}
 	
 	public void createMenuLibrary(LayoutInflater inflater, ViewGroup container){
@@ -413,13 +438,12 @@ public class MainFragment extends Fragment implements LoaderCallbacks<JSONObject
 		
 		Cursor result;
 		rootView = inflater.inflate(R.layout.setting, container, false);
-		TextView sls = (TextView)rootView.findViewById(R.id.setting_lock_screen);
-		TextView sv = (TextView)rootView.findViewById(R.id.setting_vibration);
-		TableLayout timeTable = (TableLayout)rootView.findViewById(R.id.time_table);
-		
+
 		mp = new MainProvider(getActivity());
     	mp.open();
     	
+    	// time table
+    	TableLayout timeTable = (TableLayout)rootView.findViewById(R.id.time_table);
 		int i, j, idx=1;
 		TableRow tr;
 		TextView td;
@@ -450,6 +474,8 @@ public class MainFragment extends Fragment implements LoaderCallbacks<JSONObject
 			}
 		}
 		
+		// lock screen 
+		TextView sls = (TextView)rootView.findViewById(R.id.setting_lock_screen);
     	result = mp.fetchSetting("lock_screen");
     	if(result.getCount() < 1) {
     		mp.insertSetting("lock_screen", "ON");
@@ -466,6 +492,8 @@ public class MainFragment extends Fragment implements LoaderCallbacks<JSONObject
    			mp.updateSettingItem("lock_screen", "OFF");
     	}
    		
+    	// vibration
+    	TextView sv = (TextView)rootView.findViewById(R.id.setting_vibration);
     	result = mp.fetchSetting("vibration");
     	if(result.getCount() < 1) {
     		mp.insertSetting("vibration", "ON");
@@ -474,16 +502,84 @@ public class MainFragment extends Fragment implements LoaderCallbacks<JSONObject
     	else if(result.move(0)) {
     		String value = result.getString(0);
     		if(value.equals("ON")){
-    			mp.updateSettingItem("vibration", "ON");
+    			//mp.updateSettingItem("vibration", "ON");
         		sv.setText("ON");
     		}
     		else{
-    			mp.updateSettingItem("vibration", "OFF");
+    			//mp.updateSettingItem("vibration", "OFF");
 				sv.setText("OFF");
     		}
     	}
     	
+    	// skip
+    	TextView ss = (TextView)rootView.findViewById(R.id.setting_skip);
+    	result = mp.fetchSetting("skip");
+    	if(result.getCount() < 1) {
+    		mp.insertSetting("skip", "10");
+    		ss.setText("10 ¡å");
+    	}
+    	else if(result.move(0)) {
+    		String value = result.getString(0);
+    		ss.setText(value+" ¡å");
+    	}
+    	
+    	result = mp.fetchSetting("skip_current");
+    	if(result.getCount() < 1) {
+    		mp.insertSetting("skip_current", "10");
+    	}
+    	
     	mp.close();
+    	
+    	ss.setOnClickListener(new View.OnClickListener() {
+    		private TextView clickView;
+			@Override
+			public void onClick(View v) {
+				clickView = (TextView)v; 
+				// TODO Auto-generated method stub
+				/*
+				ArrayList<String> menuItems = new ArrayList<String>();
+				menuItems.add("0");
+				menuItems.add("10");
+				menuItems.add("20");
+				menuItems.add("30");
+				
+				//LayoutInflater mLayoutInflater = (LayoutInflater) getActivity().getBaseContext().getSystemService(LAYOUT_INFLATER_SERVICE);
+				LayoutInflater mLayoutInflater = (LayoutInflater) getActivity().getLayoutInflater();
+				View mView = mLayoutInflater.inflate(R.layout.skip_menu, null);
+				LinearLayout skipListView = (LinearLayout) mView.findViewById(R.id.skip_menu_list);
+				int i;
+				for(i=0; i<menuItems.size(); i++) {
+					TextView tv = new TextView(getActivity());
+					tv.setText(menuItems.get(i));
+					tv.setTextColor(Color.rgb(255, 255, 255));
+					tv.setTextSize(20);
+					tv.setBackgroundColor(Color.rgb(127, 50, 59));
+					tv.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT,LayoutParams.WRAP_CONTENT));
+					skipListView.addView(tv);
+				}
+				
+				PopupWindow mPopupWindow = new PopupWindow(mView,LayoutParams.MATCH_PARENT,LayoutParams.MATCH_PARENT, false);
+				mPopupWindow.showAsDropDown(v, 0, (int)v.getY());
+				*/
+				
+				PopupMenu popup = new PopupMenu(getActivity(), v);
+		        popup.getMenuInflater().inflate(R.menu.skip_menu, popup.getMenu());
+		        
+		        popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+		            public boolean onMenuItemClick(MenuItem item) {
+		            	clickView.setText(item.getTitle() + " ¡å");
+		            	mp.open();
+		            	mp.updateSettingItem("skip", item.getTitle().toString());
+		        		mp.updateSettingItem("skip_current", item.getTitle().toString());
+		        		mp.close();
+		                return true;
+		            }
+		        });
+
+		        popup.show();
+		        
+			}
+		});
     	
     	sls.setOnClickListener(new View.OnClickListener() {
 			@Override

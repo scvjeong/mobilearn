@@ -175,7 +175,17 @@ public class MyFragment extends Fragment{
     		HashMap<String, String> value = new HashMap<String, String>();
     		value.put(MainProvider.KEY_OID, result.getString(0));
         	value.put(MainProvider.KEY_QUESTION, result.getString(1));
-        	value.put(MainProvider.KEY_PERSENT, result.getString(3) + "/" + result.getString(2));
+        	value.put(MainProvider.KEY_SCORE, "+" + result.getString(5));
+        	
+        	int correct = result.getInt(3);
+        	int cnt = result.getInt(2);
+        	String persent;
+        	if(cnt==0)
+        		persent = "0%";
+        	else
+        		persent = Math.round(correct/cnt*100) + "%";
+        	
+        	value.put(MainProvider.KEY_PERSENT, persent);
         	
         	switch(result.getInt(4))
         	{

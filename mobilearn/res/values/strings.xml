@@ -15,6 +15,12 @@
     <string name="a6"></string>
     <string name="unlock">탭하여 잠금해제(5)</string>
     
+    
+    <string name="skip_1">0</string>
+    <string name="skip_2">10</string>
+    <string name="skip_3">20</string>
+    <string name="skip_4">30</string>
+    
     <string name="mode_question">Question</string>
     <string name="mode_view">View</string>
     

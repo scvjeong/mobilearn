@@ -313,8 +313,7 @@ public class MainProvider {
         initialValues.put(KEY_ITEM, item);
         initialValues.put(KEY_VALUE, value);
         return mDb.insert(TABLE_SETTING, null, initialValues);
-    }
- 
+    } 
     public boolean deleteSetting(String item) {
         return mDb.delete(TABLE_SETTING, KEY_ITEM + "= '" + item + "'", null) > 0;
     }
@@ -371,6 +370,7 @@ public class MainProvider {
     			+ " , " + TABLE_QUESTION + "." +  KEY_COUNT
     			+ " , " + TABLE_QUESTION + "." +  KEY_CORRECT_ANSWER_CNT
     			+ " , " + TABLE_QUESTION + "." +  KEY_STATE
+    			+ " , " + TABLE_QUESTION + "." +  KEY_SCORE
     			+ " FROM " + TABLE_PLAYLIST_QUESTION
     			+ " INNER JOIN " + TABLE_QUESTION
     			+ " ON " + TABLE_PLAYLIST_QUESTION + "." + KEY_OID_QUESTION + " = " + TABLE_QUESTION + "." + KEY_OID
