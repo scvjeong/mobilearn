@@ -18,5 +18,5 @@ public class MarketPagerAdapter extends FragmentStatePagerAdapter {
     public int getCount() {
         //return MainFragment.NUM_PAGES;
     	return MainFragment.NUM_PAGES;
-    }    
+    }
 }

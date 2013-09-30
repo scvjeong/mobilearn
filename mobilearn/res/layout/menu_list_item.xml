@@ -1,12 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
-<TextView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@android:id/text1"
+<LinearLayout 
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:textAppearance="?android:attr/textAppearanceListItemSmall"
-    android:gravity="center"
-    android:paddingLeft="16dp"
-    android:paddingRight="16dp"
-    android:textColor="@drawable/menu_text_selector"
-    android:background="@color/orange"
-    android:minHeight="?android:attr/listPreferredItemHeightSmall"/>
+    android:paddingTop="10dp"
+    android:paddingBottom="10dp"
+    android:background="@color/orange" >
+
+    <ImageView
+        android:id="@+id/menu_item_icon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:paddingLeft="16dp"        
+        android:src="@drawable/icon_my" />
+
+	<TextView 
+	    android:id="@+id/menu_item"
+	    android:layout_width="match_parent"
+	    android:layout_height="wrap_content"
+	    android:textAppearance="?android:attr/textAppearanceListItemSmall"
+	    android:gravity="left|center"
+	    android:paddingLeft="5dp"
+	    android:textColor="@drawable/menu_text_selector"
+	    android:minHeight="?android:attr/listPreferredItemHeightSmall"/>
+</LinearLayout>

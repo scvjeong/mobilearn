@@ -10,7 +10,7 @@ import android.util.Log;
  
 public class MainProvider {
  
-	
+	public static final String KEY_LOGIN_FLAG = "login_flag";
 	public static final String KEY_PRICE = "price";
 	public static final String KEY_OWNER = "owner";
 	public static final String KEY_PERSENT = "persent";
@@ -18,6 +18,7 @@ public class MainProvider {
     public static final String KEY_QUESTION = "question";
     public static final String KEY_COUNT = "count";
     public static final String KEY_NAME = "name";
+    public static final String KEY_NICKNAME = "nickname";
     public static final String KEY_TYPE = "type";
     public static final String KEY_UPDATE_DATE = "update_date";
     public static final String KEY_REG_DATE = "reg_date";
@@ -28,6 +29,7 @@ public class MainProvider {
     public static final String KEY_OID_LIBRARY = "oid_library";
     public static final String KEY_OID_QUESTION = "oid_question";
     public static final String KEY_OID_PLAYLIST = "oid_playlist";
+    public static final String KEY_OID_MARKET = "oid_market";
     public static final String KEY_CORRECT_ANSWER_CNT = "correct_answer_cnt";
     public static final String KEY_STATE = "state"; // user : 0, seller : 1
     public static final String KEY_ITEM = "item";
@@ -56,8 +58,8 @@ public class MainProvider {
             + "question text not null, oid_library integer not null, count integer default 0, "
     		+ "correct_answer_cnt integer default 0, state integer default 0, score integer default 0);";
     private static final String TABLE_LIBRARY_CREATE = "create table library (oid integer primary key not null, "
-    		+ "name text not null, type integer not null, update_date text not null, "
-    		+ "is_use integer not null);";
+    		+ "name text not null, type integer not null, update_date text not null, thumb_url text not null, "
+    		+ "is_use integer not null, nickname text);";
     private static final String TABLE_SETTING_CREATE = "create table setting (oid integer primary key autoincrement not null, "
             + "item text not null, value text not null );";
     private static final String TABLE_LOG_CREATE = "create table logs (oid integer primary key autoincrement not null, "
@@ -140,12 +142,13 @@ public class MainProvider {
         mDbHelper.close();
     }
  
-    public long createQuestion(int oid, String question, long oid_library, int score) {
+    public long createQuestion(long oid, String question, long oidLibrary, int score, int state) {
         ContentValues initialValues = new ContentValues();
         initialValues.put(KEY_OID, oid);
         initialValues.put(KEY_QUESTION, question);
-        initialValues.put(KEY_OID_LIBRARY, oid_library);
+        initialValues.put(KEY_OID_LIBRARY, oidLibrary);
         initialValues.put(KEY_SCORE, score);
+        initialValues.put(KEY_STATE, state);
         return mDb.insert(TABLE_QUESTION, null, initialValues);
     }
  
@@ -154,7 +157,7 @@ public class MainProvider {
         return mDb.delete(TABLE_QUESTION, KEY_OID + "=" + rowId, null) > 0;
     }
  
-    public Cursor fetchAllQuestionInLibrary(long oid_library) {
+    public Cursor fetchAllQuestionInLibrary(long oidLibrary) {
     	String sql = "SELECT " + KEY_OID +", "
     			+ KEY_QUESTION + ", " 
     			+ KEY_COUNT + ", "
@@ -162,7 +165,7 @@ public class MainProvider {
     			+ KEY_STATE + ", "
     			+ KEY_SCORE + " "
     			+ " FROM " + TABLE_QUESTION
-    			+ " WHERE  " + KEY_OID_LIBRARY + " = " + oid_library
+    			+ " WHERE  " + KEY_OID_LIBRARY + " = " + oidLibrary
     			+ " ORDER BY " + KEY_QUESTION + " ASC";
         Cursor mCursor = mDb.rawQuery(sql, null);
         if (mCursor != null) {
@@ -172,10 +175,80 @@ public class MainProvider {
         //return mDb.query(TABLE_QUESTION, new String[] { KEY_OID, KEY_QUESTION, KEY_COUNT, KEY_CORRECT_ANSWER_CNT, KEY_STATE }, null, null, null, null, KEY_QUESTION + " ASC");
     }
     
-    public Cursor fetchAllQuestionInLibraryForCount(long oid_library) {
+    public Cursor fetchQuestionInLibraryForState(long oidLibrary, int stateFlag) {
+    	String sql = "SELECT " + KEY_OID +", "
+    			+ KEY_QUESTION + ", " 
+    			+ KEY_COUNT + ", "
+    			+ KEY_CORRECT_ANSWER_CNT + ", "
+    			+ KEY_STATE + ", "
+    			+ KEY_SCORE + " "
+    			+ " FROM " + TABLE_QUESTION
+    			+ " WHERE  " + KEY_OID_LIBRARY + " = " + oidLibrary
+    			+ " AND  " + KEY_STATE + " = " + stateFlag
+    			+ " ORDER BY " + KEY_QUESTION + " ASC";
+        Cursor mCursor = mDb.rawQuery(sql, null);
+        if (mCursor != null) {
+            mCursor.moveToFirst();
+        }
+        return mCursor;
+    }
+    
+    public Cursor fetchQuestionCountInLibraryForState(long oidLibrary, int stateFlag) {
+    	String sql = "SELECT COUNT(*)"
+    			+ " FROM " + TABLE_QUESTION
+    			+ " WHERE  " + KEY_OID_LIBRARY + " = " + oidLibrary
+    			+ " AND  " + KEY_STATE + " = " + stateFlag;
+        Cursor mCursor = mDb.rawQuery(sql, null);
+        if (mCursor != null) {
+            mCursor.moveToFirst();
+        }
+        return mCursor;
+    }
+    
+    public Cursor fetchQuestionInLibraryForDaily(long oidLibrary, String regDate, int correctFlag) {
+    	String sql = "SELECT " + TABLE_QUESTION + "." +  KEY_OID
+    			+ " , " + TABLE_QUESTION + "." +  KEY_QUESTION
+    			+ " , " + TABLE_QUESTION + "." +  KEY_COUNT
+    			+ " , " + TABLE_QUESTION + "." +  KEY_CORRECT_ANSWER_CNT
+    			+ " , " + TABLE_QUESTION + "." +  KEY_STATE
+    			+ " , " + TABLE_QUESTION + "." +  KEY_SCORE
+    			+ " FROM " + TABLE_QUESTION
+    			+ " INNER JOIN " + TABLE_LOG
+    			+ " ON " + TABLE_QUESTION + "." + KEY_OID + " = " + TABLE_LOG + "." + KEY_OID_QUESTION
+    			+ " WHERE  " + TABLE_QUESTION + "." + KEY_OID_LIBRARY + " = " + oidLibrary
+    			+ " AND  " + TABLE_LOG + "." + KEY_REG_DATE + " >= " + regDate
+    			+ " AND  " + TABLE_LOG + "." + KEY_REG_DATE + " < (" + regDate + " + 1000000)"
+    			+ " AND  " + TABLE_LOG + "." + KEY_CORRECT_FLAG + " = " + correctFlag
+				+ " GROUP BY " + TABLE_QUESTION + "." + KEY_OID
+    			+ " ORDER BY " + TABLE_LOG + "." + KEY_REG_DATE + " DESC";
+        Cursor mCursor = mDb.rawQuery(sql, null);
+        if (mCursor != null) {
+            mCursor.moveToFirst();
+        }
+        return mCursor;
+    }
+    
+    public Cursor fetchQuestionCountInLibraryForDaily(long oidLibrary, String regDate, int correctFlag) {
+    	String sql = "SELECT COUNT(" + TABLE_QUESTION + "." + KEY_OID + ")"
+    			+ " FROM " + TABLE_QUESTION
+    			+ " INNER JOIN " + TABLE_LOG
+    			+ " ON " + TABLE_QUESTION + "." + KEY_OID + " = " + TABLE_LOG + "." + KEY_OID_QUESTION
+    			+ " WHERE  " + TABLE_QUESTION + "." + KEY_OID_LIBRARY + " = " + oidLibrary
+    			+ " AND  " + TABLE_LOG + "." + KEY_REG_DATE + " >= " + regDate
+    			+ " AND  " + TABLE_LOG + "." + KEY_REG_DATE + " < (" + regDate + " + 1000000)"
+    			+ " AND  " + TABLE_LOG + "." + KEY_CORRECT_FLAG + " = " + correctFlag;
+
+        Cursor mCursor = mDb.rawQuery(sql, null);
+        if (mCursor != null) {
+            mCursor.moveToFirst();
+        }
+        return mCursor;
+    }
+    
+    public Cursor fetchAllQuestionInLibraryForCount(long oidLibrary) {
     	String sql = "SELECT COUNT(*) "
     			+ " FROM " + TABLE_QUESTION
-    			+ " WHERE  " + KEY_OID_LIBRARY + " = " + oid_library;
+    			+ " WHERE  " + KEY_OID_LIBRARY + " = " + oidLibrary;
         Cursor mCursor = mDb.rawQuery(sql, null);
         if (mCursor != null) {
             mCursor.moveToFirst();
@@ -184,10 +257,10 @@ public class MainProvider {
         //return mDb.query(TABLE_QUESTION, new String[] { KEY_OID, KEY_QUESTION, KEY_COUNT, KEY_CORRECT_ANSWER_CNT, KEY_STATE }, null, null, null, null, KEY_QUESTION + " ASC");
     }
  
-    public Cursor fetchQuestion(long oid_library, int limit) throws SQLException {
+    public Cursor fetchQuestion(long oidLibrary, int limit) throws SQLException {
     	String sql = "SELECT oid, question, score " 
     			+ " FROM " + TABLE_QUESTION
-    			+ " WHERE "+ KEY_OID_LIBRARY +" = " + oid_library
+    			+ " WHERE "+ KEY_OID_LIBRARY +" = " + oidLibrary
     			+ " ORDER BY count ASC, oid ASC"
     			+ " LIMIT " + limit;
         Cursor mCursor = mDb.rawQuery(sql, null);
@@ -241,28 +314,33 @@ public class MainProvider {
         */
     }
     
-    public long insertLibrary(int oid, String name, int type, String update_date, int is_use) {
+    public long insertLibrary(long oid, String name, String nickname, int type, String update_date, int is_use, String thumbnailUrl) {
         ContentValues initialValues = new ContentValues();
         initialValues.put(KEY_OID, oid);
         initialValues.put(KEY_NAME, name);
+        initialValues.put(KEY_NICKNAME, nickname);
         initialValues.put(KEY_TYPE, type);
         initialValues.put(KEY_UPDATE_DATE, update_date);
         initialValues.put(KEY_IS_USE, is_use);
+        initialValues.put(KEY_THUMB_URL, thumbnailUrl);
         return mDb.insert(TABLE_LIBRARY, null, initialValues);
     }
  
     public boolean deleteLibrary(long oid) {
-        Log.i("Delete called", "value__" + oid);
         return mDb.delete(TABLE_LIBRARY, KEY_OID + "=" + oid, null) > 0;
     }
  
     public Cursor fetchAllLibrary() {
-        return mDb.query(TABLE_LIBRARY, new String[] { KEY_OID, KEY_NAME, KEY_TYPE, KEY_UPDATE_DATE }, null, null, null, null, KEY_NAME + " ASC");
+    	Cursor mCursor = mDb.query(TABLE_LIBRARY, new String[] { KEY_OID, KEY_NAME, KEY_NICKNAME, KEY_THUMB_URL, KEY_TYPE, KEY_UPDATE_DATE }, null, null, null, null, KEY_NAME + " ASC");
+    	if (mCursor != null) {
+            mCursor.moveToFirst();
+        }
+        return mCursor;  
     }
  
     public Cursor fetchLibrary(long oid) throws SQLException {
  
-        Cursor mCursor = mDb.query(true, TABLE_LIBRARY, new String[] { KEY_OID, KEY_NAME, KEY_TYPE, KEY_UPDATE_DATE }, KEY_OID
+        Cursor mCursor = mDb.query(true, TABLE_LIBRARY, new String[] { KEY_OID, KEY_NAME, KEY_NICKNAME, KEY_THUMB_URL, KEY_TYPE, KEY_UPDATE_DATE }, KEY_OID
                 + "=" + oid, null, null, null, null, null);
         if (mCursor != null) {
             mCursor.moveToFirst();
@@ -270,7 +348,7 @@ public class MainProvider {
         return mCursor;
     }
     
-    public long insertAnswer(int oid, String reply, int answer, int oid_question) {
+    public long insertAnswer(long oid, String reply, int answer, long oid_question) {
         ContentValues initialValues = new ContentValues();
         initialValues.put(KEY_OID, oid);
         initialValues.put(KEY_REPLY, reply);
@@ -350,7 +428,11 @@ public class MainProvider {
     }
     
     public Cursor fetchAllPlayList() {
-    	return mDb.query(TABLE_PLAYLIST, new String[] { KEY_OID, KEY_TITLE }, null, null, null, null, KEY_OID + " DESC");
+    	Cursor mCursor = mDb.query(TABLE_PLAYLIST, new String[] { KEY_OID, KEY_TITLE }, null, null, null, null, KEY_OID + " DESC");
+    	if (mCursor != null) {
+            mCursor.moveToFirst();
+        }
+    	return mCursor;
     }
     
     public long insertPlayListQustion(long oid_playlist, long oid_question) {
@@ -383,7 +465,7 @@ public class MainProvider {
         return mCursor;
     }
     
-    public long insertLog(long oid_question, int correct_flag, int score, double reg_date) {
+    public long insertLog(long oid_question, int correct_flag, int score, long reg_date) {
         ContentValues initialValues = new ContentValues();
         initialValues.put(KEY_OID_QUESTION, oid_question);
         initialValues.put(KEY_CORRECT_FLAG, correct_flag);
@@ -394,6 +476,22 @@ public class MainProvider {
     
     public Cursor fetchScoreForMain(long old_library) {
     	String sql = "SELECT SUM(" + TABLE_LOG + "." +  KEY_SCORE + ")"
+    			+ " FROM " + TABLE_LOG
+    			+ " INNER JOIN " + TABLE_QUESTION
+    			+ " ON " + TABLE_LOG + "." + KEY_OID_QUESTION + " = " + TABLE_QUESTION + "." + KEY_OID
+    			+ " INNER JOIN " + TABLE_LIBRARY
+    			+ " ON " + TABLE_QUESTION + "." + KEY_OID_LIBRARY + " = " + TABLE_LIBRARY + "." + KEY_OID
+    			+ " WHERE " + TABLE_LIBRARY + "."+ KEY_OID +" = " + old_library;
+    			
+        Cursor mCursor = mDb.rawQuery(sql, null);
+        if (mCursor != null) {
+            mCursor.moveToFirst();
+        }
+        return mCursor;
+    }
+    
+    public Cursor fetchLog(long old_library) {
+    	String sql = "SELECT " + TABLE_QUESTION + "." + KEY_OID
     			+ " FROM " + TABLE_LOG
     			+ " INNER JOIN " + TABLE_QUESTION
     			+ " ON " + TABLE_LOG + "." + KEY_OID_QUESTION + " = " + TABLE_QUESTION + "." + KEY_OID

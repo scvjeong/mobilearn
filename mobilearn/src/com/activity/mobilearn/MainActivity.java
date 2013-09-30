@@ -1,59 +1,22 @@
 package com.activity.mobilearn;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import com.example.mobilearn.R;
-import com.lib.mobilearn.JSONParser;
-import com.service.mobilearn.LoadingService;
 import com.service.mobilearn.LockScreenService;
 
 import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
-import android.app.LoaderManager.LoaderCallbacks;
-import android.content.AsyncTaskLoader;
 import android.content.ComponentName;
-import android.content.Context;
-import android.content.Intent;
-import android.content.Loader;
-import android.database.Cursor;
 import android.graphics.Color;
-import android.graphics.PixelFormat;
 import android.graphics.drawable.ColorDrawable;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.widget.DrawerLayout;
-import android.text.TextUtils;
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MotionEvent;
+import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.Window;
-import android.view.WindowManager;
-import android.view.WindowManager.LayoutParams;
-import android.widget.AbsListView;
-import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.CompoundButton;
-import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.SearchView;
-import android.widget.SearchView.OnQueryTextListener;
-import android.widget.Switch;
-import android.widget.TextView;
 
 public class MainActivity extends Activity{
 	
@@ -61,9 +24,10 @@ public class MainActivity extends Activity{
     private ListView mDrawerList;
     private ActionBarDrawerToggle mDrawerToggle;
 
-    private CharSequence mDrawerTitle;
     private CharSequence mTitle;
     private String[] mList;
+    private int pageNum;
+    private Fragment fragment;
     
     public static ComponentName lockScreenService = null;
     
@@ -82,13 +46,46 @@ public class MainActivity extends Activity{
         
         // menu
         mList = getResources().getStringArray(R.array.menu_list);
+        MenuAdapter mAdapter = new MenuAdapter(this, mList);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         mDrawerList = (ListView) findViewById(R.id.left_drawer);
-        mDrawerList.setAdapter(new ArrayAdapter<String>(this,
-                R.layout.menu_list_item, mList));
+        //mDrawerList.setAdapter(new ArrayAdapter<String>(this, R.layout.menu_list_item, mList));
+        mDrawerList.setAdapter(mAdapter);
         mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
         
-        selectItem(0);
+        int loginFlag = 0;
+		Bundle bundle = getIntent().getExtras();
+		if(bundle!=null) 
+			loginFlag = (Integer) bundle.get(MainProvider.KEY_LOGIN_FLAG);
+		if(loginFlag==1)
+			selectItem(4);
+		else
+			selectItem(0);
+        
+        // enable ActionBar app icon to behave as action to toggle nav drawer
+        getActionBar().setDisplayHomeAsUpEnabled(true);
+        getActionBar().setHomeButtonEnabled(true);
+
+        // ActionBarDrawerToggle ties together the the proper interactions
+        // between the sliding drawer and the action bar app icon
+        mDrawerToggle = new ActionBarDrawerToggle(
+                this,                  /* host Activity */
+                mDrawerLayout,         /* DrawerLayout object */
+                R.drawable.ic_drawer,  /* nav drawer image to replace 'Up' caret */
+                R.string.drawer_open,  /* "open drawer" description for accessibility */
+                R.string.drawer_close  /* "close drawer" description for accessibility */
+                ) {
+            public void onDrawerClosed(View view) {
+                getActionBar().setTitle(mTitle);
+                invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
+            }
+
+            public void onDrawerOpened(View drawerView) {
+                getActionBar().setTitle(mTitle);
+                invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
+            }
+        };
+        mDrawerLayout.setDrawerListener(mDrawerToggle);
     }
     
     @Override
@@ -105,7 +102,9 @@ public class MainActivity extends Activity{
    
     private void selectItem(int position) {
         // update the main content by replacing fragments
-        Fragment fragment = new MainFragment();
+    	pageNum = position;
+    	
+        fragment = new MainFragment();
         Bundle args = new Bundle();
         args.putInt(MainFragment.MENU_NUMBER, position);
         fragment.setArguments(args);
@@ -118,6 +117,18 @@ public class MainActivity extends Activity{
         setTitle(mList[position]);
         setTitleBackground(position);
         mDrawerLayout.closeDrawer(mDrawerList);
+        
+    }
+    
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+         // The action bar home/up action should open or close the drawer.
+         // ActionBarDrawerToggle will take care of this.
+        if (mDrawerToggle.onOptionsItemSelected(item)) {
+            return true;
+        }
+       
+        return super.onOptionsItemSelected(item);
     }
     
     @Override
@@ -153,5 +164,4 @@ public class MainActivity extends Activity{
 			break;
 		}
     }
-	
 }

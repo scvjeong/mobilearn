@@ -1,0 +1,37 @@
+<LinearLayout 
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+
+    <android.support.v4.view.ViewPager 
+		android:id="@+id/pager"
+		android:layout_width="match_parent"
+		android:layout_height="0dp"
+	    android:layout_weight="0.9" />
+    
+    <LinearLayout 
+	    android:id="@+id/menu_bar"
+	    android:layout_width="match_parent"
+	    android:layout_height="0dp"
+	    android:layout_weight="0.1" >
+	    <TextView 
+	        android:id="@+id/menu_statis1"
+	        android:layout_width="0dp"
+		    android:layout_height="match_parent"
+		    android:layout_weight="0.5"
+		    android:gravity="center"
+		    android:background="@drawable/statis_menu_bar_selected"
+		    android:textColor="@color/red"
+		    android:text="STATE"/>
+	    <TextView 
+	        android:id="@+id/menu_statis2"
+	        android:layout_width="0dp"
+		    android:layout_height="match_parent"
+		    android:layout_weight="0.5"
+		    android:gravity="center"
+		    android:background="@drawable/statis_menu_bar"
+		    android:textColor="#000"
+		    android:text="DAILY"/>
+	</LinearLayout>
+</LinearLayout>

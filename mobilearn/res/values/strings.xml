@@ -15,6 +15,13 @@
     <string name="a6"></string>
     <string name="unlock">탭하여 잠금해제(5)</string>
     
+    <string name="drawer_open">Open navigation drawer</string>
+    <string name="drawer_close">Close navigation drawer</string>
+    
+    <string name="state_1">초기학습</string>
+    <string name="state_2">감각기억</string>
+    <string name="state_3">단기기억</string>
+    <string name="state_4">장기기억</string>
     
     <string name="skip_1">0</string>
     <string name="skip_2">10</string>
@@ -51,10 +58,6 @@
         <item>STATISTICS</item>
         <item>MARKET</item>
         <item>SETTING</item>
-        <item>questions_update(dev)</item>
-        <item>answers_update(dev)</item>
-        <item>library_update(dev)</item>
-        <item>db_init(dev)</item>
     </string-array>
      
 </resources>

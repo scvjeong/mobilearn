@@ -19,7 +19,8 @@
 	        android:layout_height="wrap_content"
 	        android:drawableLeft="@drawable/icon_plus"
 	        android:drawablePadding="5dp"
-	        android:padding="8dp"
+	        android:padding="15dp"
+	        android:background="@drawable/playlist_menu_bar"
 	        android:textSize="18dp"
 	        android:text="@string/add_playlist" />
 		
@@ -44,8 +45,9 @@
 	        android:id="@+id/playlist_menu"
 	        android:layout_width="match_parent"
 	        android:layout_height="wrap_content"
-	        android:paddingTop="5dp"
-	        android:paddingBottom="5dp" >
+	        android:background="@drawable/playlist_menu_bar"
+	        android:paddingTop="13dp"
+	        android:paddingBottom="13dp" >
 	        
 	        <TextView
 		        android:id="@+id/btn_edit_playlist"

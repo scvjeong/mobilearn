@@ -8,7 +8,6 @@ import com.lib.mobilearn.ImageLoader;
 
 import android.app.Activity;
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,7 +29,6 @@ public class MarketAdapter extends BaseAdapter implements Filterable{
 		data = d;
 		inflater = (LayoutInflater)activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		imageLoader=new ImageLoader(activity.getApplicationContext());
-		Log.e("MarketAdapter","creator");
 	}
 	
 	@Override
@@ -40,9 +38,9 @@ public class MarketAdapter extends BaseAdapter implements Filterable{
 	}
 
 	@Override
-	public Object getItem(int position) {
+	public HashMap<String, String> getItem(int position) {
 		// TODO Auto-generated method stub
-		return position;
+		return data.get(position);
 	}
 
 	@Override
@@ -60,17 +58,18 @@ public class MarketAdapter extends BaseAdapter implements Filterable{
 		TextView title = (TextView)vi.findViewById(R.id.title_of_market);
 		TextView nickname = (TextView)vi.findViewById(R.id.nickname);
 		TextView price = (TextView)vi.findViewById(R.id.price);
-		ImageView thumb_image=(ImageView)vi.findViewById(R.id.list_image);
-
+		ImageView thumbImage=(ImageView)vi.findViewById(R.id.list_image);
+		
 		HashMap<String, String> library = new HashMap<String, String>();
 		library = data.get(position);
 		
 		title.setText(library.get(MainProvider.KEY_NAME));
 		nickname.setText(library.get(MainProvider.KEY_OWNER));
 		price.setText("$" + library.get(MainProvider.KEY_PRICE));
-		String thumb_url = library.get(MainProvider.KEY_THUMB_URL);
-		if( !thumb_url.equals("null") ) {
-			imageLoader.DisplayImage("http://lyd.kr:3000" + thumb_url, thumb_image);
+		String thumbUrl = library.get(MainProvider.KEY_THUMB_URL);
+		
+		if( !thumbUrl.equals("null") ) {
+			imageLoader.DisplayImage("http://lyd.kr:3000" + thumbUrl, thumbImage);
 		}
 		
 		//vi.setBackgroundColor((position & 1) == 1 ? Color.WHITE : Color.rgb(172,172,172) );

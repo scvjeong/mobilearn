@@ -30,7 +30,7 @@
         <item name="android:backgroundSplit">@drawable/dialog_background</item>
     </style>
     
-    <style name="MyAlertDialogTheme" parent="@android:style/Theme.Holo.Light.Dialog">
-        <item name="android:windowBackground">@drawable/dialog_background</item>
+    <style name="MyAlertDialogTheme" parent="@android:style/Theme.Holo.Dialog">
+        <item name="android:windowBackground">@null</item>
     </style>
 </resources>

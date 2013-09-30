@@ -2,20 +2,123 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical" >
-
-  	<SearchView
-	    android:id="@+id/search_view"
+    android:orientation="vertical"
+    android:background="#fff" >
+	
+    <LinearLayout
+        android:id="@+id/library_front"
 	    android:layout_width="match_parent"
-	    android:layout_height="wrap_content"
-	    android:background="#291a04"
-	    android:padding="5dp" />
-    <ListView
-        android:id="@+id/list"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:divider="#acacac"
-        android:dividerHeight="1dp"
-        android:background="#ffffff"/>
+	    android:layout_height="match_parent"
+	    android:orientation="vertical"
+	    android:background="#fff" >
+	    <ListView
+	        android:id="@+id/list"
+	        android:layout_width="fill_parent"
+	        android:layout_height="wrap_content"
+	        android:divider="#acacac"
+	        android:dividerHeight="1dp"
+	        android:background="#fff"/>
+	</LinearLayout>
+    
+    <LinearLayout 
+	    android:id="@+id/library_back"
+		android:layout_width="match_parent"
+		android:layout_height="match_parent"
+		android:orientation="vertical"
+		android:visibility="gone" >
+	    
+	    <RelativeLayout 
+		    android:layout_width="match_parent"
+		    android:layout_height="wrap_content"
+		    android:orientation="horizontal"
+		    android:paddingTop="30dp"
+		    android:paddingBottom="30dp"
+		    android:paddingLeft="20dp"
+		    android:paddingRight="20dp" >
+			
+		    <LinearLayout android:id="@+id/thumbnail_back"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		        android:padding="3dip"
+		        android:layout_alignParentLeft="true"
+		        android:background="@drawable/market_list_thumbnail"
+		        android:layout_marginRight="5dip">
+		 
+		        <ImageView
+		            android:id="@+id/image_back"
+		            android:layout_width="48dip"
+		            android:layout_height="48dip" />
+		
+		    </LinearLayout>
+		    
+		    <TextView
+		        android:id="@+id/title_of_library_back"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		        android:layout_alignTop="@+id/thumbnail_back"
+		        android:layout_toRightOf="@+id/thumbnail_back"
+		        android:text="Jeong"
+		        android:textColor="#434343"
+		        android:textSize="20dip" />
+		
+		    <TextView
+		        android:id="@+id/nickname_back"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		        android:layout_alignLeft="@+id/title_of_library_back"
+		        android:layout_below="@+id/title_of_library_back"
+		        android:textColor="@color/gray"
+		        android:text="TextView" />
+		
+		    <TextView
+		        android:id="@+id/use_back"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		        android:layout_alignBottom="@+id/thumbnail_back"
+		        android:layout_alignParentRight="true"
+		        android:paddingLeft="5dp"
+		        android:paddingRight="5dp"
+		        android:background="@color/gray"
+		        android:textSize="14dp"
+		        android:textColor="#fff"
+		        android:text="USE" />
+		
+		</RelativeLayout>
+		<LinearLayout 
+		    android:layout_width="match_parent"
+	        android:layout_height="wrap_content"
+	        android:background="#fff" >
+
+			<TextView
+			    android:id="@+id/preview"
+			    android:layout_width="0dp"
+			    android:layout_height="wrap_content"
+			    android:layout_weight="0.5"
+			    android:gravity="center"
+			    android:padding="15dp"
+			    android:background="@drawable/library_tab_selected"
+			    android:textColor="#3a2404"
+			    android:text="Preview" />
+			<TextView
+			    android:id="@+id/review"
+			    android:layout_width="0dp"
+			    android:layout_height="wrap_content"
+			    android:layout_weight="0.5"
+			    android:gravity="center"
+			    android:padding="15dp"
+			    android:background="@drawable/library_tab"
+			    android:textColor="#696764"
+			    android:text="Review" />
+			
+		</LinearLayout>
+		<ListView
+	        android:id="@+id/list_back"
+	        android:layout_width="match_parent"
+	        android:layout_height="wrap_content"
+	        android:divider="#acacac"
+	        android:dividerHeight="1dp"
+	        android:background="#fff"
+	        android:listSelector="@drawable/list_selector" />
+    </LinearLayout>
 
 </LinearLayout>

@@ -34,9 +34,9 @@ public class LockScreenActivity extends Activity implements OnClickListener{
 	private static int NO_ANSWER_MAX_NUM = 100;
 	private int answerNum, score;
 	private boolean is_first = true, bibrator_flog = true;;
-	private long oid_question;
+	private long oidQuestion;
 	private Vibrator vibrator = null;
-	private double reg_date;
+	private long regDate;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -61,22 +61,22 @@ public class LockScreenActivity extends Activity implements OnClickListener{
 		Random random = new Random();
 		int num = random.nextInt(QUESTION_NUM);
 		if(result.move(num)){
-			this.oid_question = result.getInt(0);
+			this.oidQuestion = result.getInt(0);
 			q1.setText( result.getString(1) );
 			this.score = result.getInt(2);
-			mp.updateCountQuestion(this.oid_question);
+			mp.updateCountQuestion(this.oidQuestion);
 			
 			int i, idx = 0;
 			int answerCount;
 			String answerString = "";
-			Cursor answerResult = mp.fetchTrueAnswer(this.oid_question);
+			Cursor answerResult = mp.fetchTrueAnswer(this.oidQuestion);
 			answerCount = answerResult.getCount();
 			idx = random.nextInt(answerCount);	
 			if( answerResult.move(idx) ){
 				answerString = answerResult.getString(0);
 			}
 			
-			Cursor replyResult = mp.fetchFalseAnswer(this.oid_question, NO_ANSWER_MAX_NUM);
+			Cursor replyResult = mp.fetchFalseAnswer(this.oidQuestion, NO_ANSWER_MAX_NUM);
 			int replyNum = 0;
 			String[] reply = new String[REPLY_MAX_NUM];
 			for(i=0; i<REPLY_MAX_NUM; i++){
@@ -149,7 +149,7 @@ public class LockScreenActivity extends Activity implements OnClickListener{
 	@Override
 	public void onClick(View v) {
 		
-		reg_date = Double.parseDouble(android.text.format.DateFormat.format("yyyyMMddkkmmss", System.currentTimeMillis()).toString());		
+		regDate = Long.parseLong(android.text.format.DateFormat.format("yyyyMMddkkmmss", System.currentTimeMillis()).toString());		
 		switch(v.getId()) {
 		case R.id.btn_skip:
 			int skipCount = 0;
@@ -175,7 +175,7 @@ public class LockScreenActivity extends Activity implements OnClickListener{
 	    	else {
 	    		skipCount = skipCount - 1;
 	    		mp.updateSettingItem("skip_current", String.valueOf(skipCount));
-	    		mp.insertLog(this.oid_question, 2, -1, reg_date);
+	    		mp.insertLog(this.oidQuestion, 2, -1, regDate);
 	    		finish();
 	    	}
 			mp.close();
@@ -201,13 +201,13 @@ public class LockScreenActivity extends Activity implements OnClickListener{
 			ca = true;
 			if(this.is_first) {
 				correct_flag = 1;
-				mp.updateCorrectQuestion(this.oid_question);
-				mp.insertLog(this.oid_question, correct_flag, this.score, reg_date);
+				mp.updateCorrectQuestion(this.oidQuestion);
+				mp.insertLog(this.oidQuestion, correct_flag, this.score, regDate);
 			}
 		} else {
 			correct_flag = 0;
 			incorrect_score = Math.round(this.score*2/3) * -1;
-			mp.insertLog(this.oid_question, correct_flag, incorrect_score, reg_date);
+			mp.insertLog(this.oidQuestion, correct_flag, incorrect_score, regDate);
 			
 			long pattern[] = new long[] {0, 200, 100, 200};
 			if(bibrator_flog)

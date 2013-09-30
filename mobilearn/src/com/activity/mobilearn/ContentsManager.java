@@ -1,5 +1,7 @@
 package com.activity.mobilearn;
 
+import java.util.Random;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -20,7 +22,8 @@ public class ContentsManager {
 		JSONArray contacts = null;
 		mp = new MainProvider(mCtx);
 		mp.open();
-		
+		Random r = new Random();
+		mp.insertLibrary(16391, "Jeong's", "Admin", 1, "200812121212", 1, "/uploads/library_icon/9.png");
 	    try {
 	        // Getting Array of Contacts
 	        contacts = json.getJSONArray("question_list");
@@ -30,11 +33,32 @@ public class ContentsManager {
 	            JSONObject c = contacts.getJSONObject(j);
 	             
 	            // Storing each json item in variable
-	            int oid  = Integer.parseInt(c.getString("oid"));
+	            long oid  = Long.parseLong(c.getString("oid"));
 	            String question  = c.getString("question");
 	            long oid_library  = Long.parseLong(c.getString("oid_library"));
 	            int score  = Integer.parseInt(c.getString("score"));
-	            mp.createQuestion(oid, question, oid_library, score);
+	            int state;
+	            if(j%4 == 0)
+	            	state = 0;
+	            else if(j%5 == 0)
+	            	state = 1;
+	            else
+	            	state = r.nextInt(4);
+	            mp.createQuestion(oid, question, oid_library, score, state);
+	            
+	            for(int i=0; i<3; i++) {
+	            	
+	            	String regDateString = "201309" + String.valueOf(r.nextInt(7)+23) + "121212";
+	            	long regDate = Long.parseLong(regDateString);
+	            	int flag = r.nextInt(3);
+	            	if(flag == 0)
+	            		score = -2;
+	            	else if(flag == 1)
+	            		score = 3;
+	            	else if(flag == 2)
+	            		score = -1;
+	            	mp.insertLog(oid, flag, score, regDate);
+	            }
 	        }
 	    } catch (JSONException e) {
 	        e.printStackTrace();
@@ -57,7 +81,7 @@ public class ContentsManager {
 	            JSONObject c = contacts.getJSONObject(j);
 	             
 	            // Storing each json item in variable
-	            int oid  = Integer.parseInt(c.getString("oid"));
+	            long oid  = Long.parseLong(c.getString("oid"));
 	            String question  = c.getString("question");
 	            long oid_library  = Long.parseLong(c.getString("oid_library"));
 	            int score  = Integer.parseInt(c.getString("score"));
@@ -84,10 +108,10 @@ public class ContentsManager {
 	            JSONObject c = contacts.getJSONObject(j);
 	             
 	            // Storing each json item in variable
-	            int oid  = Integer.parseInt(c.getString("oid"));
+	            long oid  = Long.parseLong(c.getString("oid"));
 	            String reply  = c.getString("reply");
 	            int answer  = Integer.parseInt(c.getString("answer"));
-	            int oid_question  = Integer.parseInt(c.getString("oid_question"));
+	            long oid_question  = Long.parseLong(c.getString("oid_question"));
 	            mp.insertAnswer(oid, reply, answer, oid_question);
 	        }
 	    } catch (JSONException e) {
@@ -111,13 +135,15 @@ public class ContentsManager {
 	            JSONObject c = contacts.getJSONObject(j);
 	             
 	            // Storing each json item in variable
-	            int oid  = Integer.parseInt(c.getString("oid"));
+	            long oid  = Long.parseLong(c.getString("oid"));
 	            String name  = c.getString("name");
 	            int type  = Integer.parseInt(c.getString("type"));
 	            String update_date  = c.getString("update_date");
+	            String thumbnailUrl  = c.getString("thumbnail_url");
+	            String nickname  = c.getString("nickname");
 	            int is_use = 1;
 	            
-	            mp.insertLibrary(oid, name, type, update_date, is_use);
+	            mp.insertLibrary(oid, name, nickname, type, update_date, is_use, thumbnailUrl);
 	        }
 	    } catch (JSONException e) {
 	        e.printStackTrace();

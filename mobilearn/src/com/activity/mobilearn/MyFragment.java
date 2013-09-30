@@ -132,36 +132,38 @@ public class MyFragment extends Fragment{
     	mp = new MainProvider(getActivity());
     	mp.open();
     	result = mp.fetchAllQuestionInLibrary(oid_library);
-    	while(result.moveToNext()){
-    		HashMap<String, String> value = new HashMap<String, String>();
-    		value.put(MainProvider.KEY_OID, result.getString(0));
-        	value.put(MainProvider.KEY_QUESTION, result.getString(1));
-        	value.put(MainProvider.KEY_SCORE, "+" + result.getString(5));
-        	
-        	int correct = result.getInt(3);
-        	int cnt = result.getInt(2);
-        	String persent;
-        	if(cnt==0)
-        		persent = "0%";
-        	else
-        		persent = Math.round(correct/cnt*100) + "%";
-        	
-        	value.put(MainProvider.KEY_PERSENT, persent);
-        	
-        	switch(result.getInt(4))
-        	{
-        	case 0:
-        		state = "기초학습";
-        		break;
-        	default:
-        		state = "기초학습";
-        	}
-        	value.put(MainProvider.KEY_STATE, state);
-        	
-        	questionList.add(value);
-		}
+    	if(result.getCount()>0) {
+	    	do {
+	    		HashMap<String, String> value = new HashMap<String, String>();
+	    		value.put(MainProvider.KEY_OID, result.getString(0));
+	        	value.put(MainProvider.KEY_QUESTION, result.getString(1));
+	        	value.put(MainProvider.KEY_SCORE, "+" + result.getString(5));
+	        	
+	        	int correct = result.getInt(3);
+	        	int cnt = result.getInt(2);
+	        	String persent;
+	        	if(cnt==0)
+	        		persent = "0%";
+	        	else
+	        		persent = Math.round(correct/cnt*100) + "%";
+	        	
+	        	value.put(MainProvider.KEY_PERSENT, persent);
+	        	
+	        	switch(result.getInt(4))
+	        	{
+	        	case 0:
+	        		state = "기초학습";
+	        		break;
+	        	default:
+	        		state = "기초학습";
+	        	}
+	        	value.put(MainProvider.KEY_STATE, state);
+	        	
+	        	questionList.add(value);
+			} while(result.moveToNext());
+    	}
     	mp.close();
-    	return new QuestionAdapter(getActivity(), questionList);
+    	return new QuestionAdapter(getActivity(), questionList, "my");
     }
     
     public QuestionAdapter getQuestionAdapterForPlayList(long oid_playlist){
@@ -171,36 +173,38 @@ public class MyFragment extends Fragment{
     	mp = new MainProvider(getActivity());
     	mp.open();
     	result = mp.fetchPlayListQuestion(oid_playlist);
-    	while(result.moveToNext()){
-    		HashMap<String, String> value = new HashMap<String, String>();
-    		value.put(MainProvider.KEY_OID, result.getString(0));
-        	value.put(MainProvider.KEY_QUESTION, result.getString(1));
-        	value.put(MainProvider.KEY_SCORE, "+" + result.getString(5));
-        	
-        	int correct = result.getInt(3);
-        	int cnt = result.getInt(2);
-        	String persent;
-        	if(cnt==0)
-        		persent = "0%";
-        	else
-        		persent = Math.round(correct/cnt*100) + "%";
-        	
-        	value.put(MainProvider.KEY_PERSENT, persent);
-        	
-        	switch(result.getInt(4))
-        	{
-        	case 0:
-        		state = "기초학습";
-        		break;
-        	default:
-        		state = "기초학습";
-        	}
-        	value.put(MainProvider.KEY_STATE, state);
-        	
-        	questionList.add(value);
-		}
+    	if(result.getCount()>0) {
+	    	do {
+	    		HashMap<String, String> value = new HashMap<String, String>();
+	    		value.put(MainProvider.KEY_OID, result.getString(0));
+	        	value.put(MainProvider.KEY_QUESTION, result.getString(1));
+	        	value.put(MainProvider.KEY_SCORE, "+" + result.getString(5));
+	        	
+	        	int correct = result.getInt(3);
+	        	int cnt = result.getInt(2);
+	        	String persent;
+	        	if(cnt==0)
+	        		persent = "0%";
+	        	else
+	        		persent = Math.round(correct/cnt*100) + "%";
+	        	
+	        	value.put(MainProvider.KEY_PERSENT, persent);
+	        	
+	        	switch(result.getInt(4))
+	        	{
+	        	case 0:
+	        		state = "기초학습";
+	        		break;
+	        	default:
+	        		state = "기초학습";
+	        	}
+	        	value.put(MainProvider.KEY_STATE, state);
+	        	
+	        	questionList.add(value);
+			} while(result.moveToNext());
+    	}
     	mp.close();
-    	return new QuestionAdapter(getActivity(), questionList);
+    	return new QuestionAdapter(getActivity(), questionList, "playlist");
     }
     
     private OnItemClickListener detailQuestionListener = new OnItemClickListener() {
@@ -337,12 +341,14 @@ public class MyFragment extends Fragment{
     	mp = new MainProvider(getActivity());
     	mp.open();
     	result = mp.fetchAllPlayList();
-    	while(result.moveToNext()){
-    		HashMap<String, String> value = new HashMap<String, String>();
-    		value.put(MainProvider.KEY_OID, result.getString(0));
-        	value.put(MainProvider.KEY_TITLE, result.getString(1));
-        	playlistList.add(value);
-		}
+    	if(result.getCount()>0) {
+	    	do {
+	    		HashMap<String, String> value = new HashMap<String, String>();
+	    		value.put(MainProvider.KEY_OID, result.getString(0));
+	        	value.put(MainProvider.KEY_TITLE, result.getString(1));
+	        	playlistList.add(value);
+			} while(result.moveToNext());
+    	}
     	mp.close();
     	
     	pAdapter = new PlayListAdapter(getActivity(), playlistList);
@@ -430,7 +436,7 @@ public class MyFragment extends Fragment{
 
         @Override
         public Dialog onCreateDialog(Bundle savedInstanceState) {
-        	AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        	AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), AlertDialog.THEME_HOLO_LIGHT);
             LayoutInflater inflater = getActivity().getLayoutInflater();
 
             builder.setView(inflater.inflate(R.layout.dialog_playlist, null))

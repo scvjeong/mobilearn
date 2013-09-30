@@ -6,6 +6,12 @@ import java.util.HashMap;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ObjectAnimator;
+import android.app.ActionBar;
+import android.app.FragmentTransaction;
+import android.app.ActionBar.Tab;
 import android.app.Fragment;
 import android.app.LoaderManager.LoaderCallbacks;
 import android.content.Context;
@@ -13,6 +19,7 @@ import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
@@ -25,18 +32,26 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
+import android.view.animation.AccelerateInterpolator;
+import android.view.animation.DecelerateInterpolator;
+import android.view.animation.Interpolator;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.PopupMenu;
-import android.widget.PopupWindow;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.mobilearn.R;
+import com.lib.mobilearn.ImageLoader;
 import com.service.mobilearn.LockScreenService;
 
 public class MainFragment extends Fragment implements LoaderCallbacks<JSONObject>{
@@ -49,17 +64,18 @@ public class MainFragment extends Fragment implements LoaderCallbacks<JSONObject
 	private ViewPager myPager, mPager, sPager;
 	private PagerAdapter myPagerAdapter, mPagerAdapter, sPagerAdapter;
 	
+	private TextView menu1, menu2;
+	
+	public ImageLoader imageLoader; 
+	
+	private LinearLayout fLayout, bLayout;
+    private Interpolator accelerator = new AccelerateInterpolator();
+    private Interpolator decelerator = new DecelerateInterpolator();
+	
 	public static final String MENU_NUMBER = "menu_number";
 	public static final int MY_NUM_PAGES = 2;
 	public static final int STATISTICS_NUM_PAGES = 2;
 	public static final int NUM_PAGES = 2;
-	
-    static final String KEY_MARKET_NAME = "market_name";
-    static final String KEY_LIBRARY_NAME = "library_name";
-    static final String KEY_THUMB_URL = "thumb_url";
-    static final String KEY_QUESTION = "question_name";
-    static final String KEY_PERSENT = "persent";
-    static final String KEY_STATE = "state";	
 	
     public MainFragment() {
         // Empty constructor required for fragment subclasses
@@ -125,20 +141,12 @@ public class MainFragment extends Fragment implements LoaderCallbacks<JSONObject
         	break;
         case 7:
         	args = new Bundle();
-        	//String url = "http://img.kr:3000/res/library/update/16391";
         	url = "http://img.kr:3000/res/library/answer/16391";
    	        args.putString("url", url);
    	        args.putString("action", "answer");
    	        getLoaderManager().initLoader(0, args, this);
         	break;
         case 8:
-        	args = new Bundle();
-   	        url = "http://img.kr:3000/res/library";
-   	        args.putString("url", url);
-	        args.putString("action", "library");
-	        getLoaderManager().initLoader(0, args, this);
-        	break;
-        case 9:
         	mp = new MainProvider(getActivity());
         	mp.init();
         	break;
@@ -151,6 +159,7 @@ public class MainFragment extends Fragment implements LoaderCallbacks<JSONObject
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater){
+    	/*
     	int i = getArguments().getInt(MENU_NUMBER);
     	switch(i){
     	case 1:
@@ -161,6 +170,7 @@ public class MainFragment extends Fragment implements LoaderCallbacks<JSONObject
     		break;
     	}    	
     	super.onCreateOptionsMenu(menu, inflater);
+    	*/
     }
     
     @Override
@@ -271,15 +281,51 @@ public class MainFragment extends Fragment implements LoaderCallbacks<JSONObject
     	
     	createMenuMainSetScore(rootView, mp);
    		
+    	/* rader */
+    	int total = 0;
+		float chartData[] = new float[5];
+		long oidLibrary = 16391;
+		for(int i=0; i<4; i++){
+			result = mp.fetchQuestionCountInLibraryForState(oidLibrary, i);
+    		if(result.move(0)){
+    			chartData[i+1] = result.getInt(0);
+    			total += result.getInt(0);
+    		}
+		}
+		chartData[0] = total;
+		
    		LinearLayout layoutChartRadar = (LinearLayout) rootView.findViewById(R.id.layout_chart_radar);
-   		float chartData[] = {30, 26, 15, 28, 24};
+   		
    		View chartRaderView = new ChartRaderView(getActivity(), chartData, "main");
    		chartRaderView.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
    		layoutChartRadar.addView(chartRaderView);
    		
+   		/* line */
+   		chartData = new float[8];
+		
+		long qTime, cTime = System.currentTimeMillis();
+    	int max = 0;
+   	
+		oidLibrary = 16391;
+		for(int i=0; i<7; i++){
+        	qTime = cTime + 1000*60*60*24*(i-6);
+        	String regDate = android.text.format.DateFormat.format("yyyyMMdd000000", qTime).toString();
+			result = mp.fetchQuestionCountInLibraryForDaily(oidLibrary, regDate, 1);
+    		if(result.move(0)){
+    			chartData[i+1] = result.getInt(0);
+    			if(max < result.getInt(0))
+    				max = result.getInt(0);
+    		}
+		}
+		
+		chartData[0] = 200;
+		for(int i=0;i<7;i++){
+			chartData[i+1] = chartData[i+1] / max * 180; 
+		}    		
+
    		LinearLayout layoutChartLine = (LinearLayout) rootView.findViewById(R.id.layout_chart_line);
-		float chartData2[] = {200, 100, 50, 120, 100, 180, 160, 105};
-   		View chartLineView = new ChartLineView(getActivity(), chartData2, "main");
+		//float chartData2[] = {200, 100, 50, 120, 100, 180, 160, 105};
+   		View chartLineView = new ChartLineView(getActivity(), chartData, "main");
    		chartLineView.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
    		layoutChartLine.addView(chartLineView);
    		
@@ -313,70 +359,150 @@ public class MainFragment extends Fragment implements LoaderCallbacks<JSONObject
 	/** createMenuMain end **/
 	
 	public void createMenuMY(LayoutInflater inflater, ViewGroup container){
-		rootView = inflater.inflate(R.layout.view_pager, container, false);
+		rootView = inflater.inflate(R.layout.my_view_pager, container, false);
         // Instantiate a ViewPager and a PagerAdapter.
 		myPager = (ViewPager) rootView.findViewById(R.id.pager);
 		myPagerAdapter = new MyPagerAdapter(getFragmentManager());
         myPager.setAdapter(myPagerAdapter);
+        menu1 = (TextView) rootView.findViewById(R.id.menu_list);
+        menu1.setOnClickListener(listClickListener);
+        menu2 = (TextView) rootView.findViewById(R.id.menu_playlist);
+        menu2.setOnClickListener(playlistClickListener);
 	}
+	private OnClickListener listClickListener = new OnClickListener() {
+		
+		@Override
+		public void onClick(View v) {
+			// TODO Auto-generated method stub
+			myPager.setCurrentItem(0);
+			TextView tv = (TextView)v;
+			tv.setBackgroundResource(R.drawable.my_menu_bar_selected);
+			tv.setTextColor(Color.rgb(233, 163, 62));
+			menu2.setBackgroundResource(R.drawable.my_menu_bar);
+			menu2.setTextColor(Color.rgb(0, 0, 0));
+		}
+	};
+	private OnClickListener playlistClickListener = new OnClickListener() {
+		
+		@Override
+		public void onClick(View v) {
+			// TODO Auto-generated method stub
+			myPager.setCurrentItem(1);
+			TextView tv = (TextView)v;
+			tv.setBackgroundResource(R.drawable.my_menu_bar_selected);
+			tv.setTextColor(Color.rgb(233, 163, 62));
+			menu1.setBackgroundResource(R.drawable.my_menu_bar);
+			menu1.setTextColor(Color.rgb(0, 0, 0));
+		}
+	};
 	
 	public void createMenuStatistics(LayoutInflater inflater, ViewGroup container){
-		rootView = inflater.inflate(R.layout.view_pager, container, false);
+		rootView = inflater.inflate(R.layout.statis_view_pager, container, false);
         // Instantiate a ViewPager and a PagerAdapter.
         sPager = (ViewPager) rootView.findViewById(R.id.pager);
         sPagerAdapter = new StatisticsPagerAdapter(getFragmentManager());
         sPager.setAdapter(sPagerAdapter);
+        menu1 = (TextView) rootView.findViewById(R.id.menu_statis1);
+        menu1.setOnClickListener(statis1);
+        menu2 = (TextView) rootView.findViewById(R.id.menu_statis2);
+        menu2.setOnClickListener(statis2);
 	}
+	private OnClickListener statis1 = new OnClickListener() {
+		
+		@Override
+		public void onClick(View v) {
+			// TODO Auto-generated method stub
+			sPager.setCurrentItem(0);
+			TextView tv = (TextView)v;
+			tv.setBackgroundResource(R.drawable.statis_menu_bar_selected);
+			tv.setTextColor(Color.rgb(127, 50, 59));
+			menu2.setBackgroundResource(R.drawable.statis_menu_bar);
+			menu2.setTextColor(Color.rgb(0, 0, 0));
+		}
+	};
+	private OnClickListener statis2 = new OnClickListener() {
+		
+		@Override
+		public void onClick(View v) {
+			// TODO Auto-generated method stub
+			sPager.setCurrentItem(1);
+			TextView tv = (TextView)v;
+			tv.setBackgroundResource(R.drawable.statis_menu_bar_selected);
+			tv.setTextColor(Color.rgb(127, 50, 59));
+			menu1.setBackgroundResource(R.drawable.statis_menu_bar);
+			menu1.setTextColor(Color.rgb(0, 0, 0));
+		}
+	};
 	
 	public void createMenuLibrary(LayoutInflater inflater, ViewGroup container){
     	Cursor result;
+    	imageLoader = new ImageLoader(getActivity());
     	
 		rootView = inflater.inflate(R.layout.library, container, false);
     	lList = (ListView)rootView.findViewById(R.id.list);
-    	//mSearchView = (SearchView)rootView.findViewById(R.id.search_view);
     	libraryList = new ArrayList<HashMap<String, String>>();
-   	
+    	long oidLibrary = 0;
     	mp = new MainProvider(getActivity());
     	mp.open();
     	result = mp.fetchAllLibrary();
-    	while(result.moveToNext()){
-    		HashMap<String, String> value = new HashMap<String, String>();
-        	value.put(KEY_LIBRARY_NAME, result.getString(1));
-        	value.put(KEY_THUMB_URL, "http://lyd.kr:3000" + result.getString(3));
-        	libraryList.add(value);
-		}
+    	if(result.getCount()>0) {
+	    	do {
+	    		HashMap<String, String> value = new HashMap<String, String>();
+	    		value.put(MainProvider.KEY_OID, result.getString(0));
+	    		value.put(MainProvider.KEY_NAME, result.getString(1));
+	        	value.put(MainProvider.KEY_NICKNAME, result.getString(2));
+	        	value.put(MainProvider.KEY_THUMB_URL, result.getString(3));
+	        	libraryList.add(value);
+			} while(result.moveToNext());
+    	}
+    	
     	mp.close();
+    	
+    	fLayout = (LinearLayout)rootView.findViewById(R.id.library_front);
+    	bLayout = (LinearLayout)rootView.findViewById(R.id.library_back);
     	
     	lAdapter = new LibraryAdapter(getActivity(), libraryList);
     	lList.setAdapter(lAdapter);
-    	lList.setTextFilterEnabled(true);
-    	/*
-    	setupSearchView();
-    	
-    	mWindowManager = (WindowManager)getActivity().getSystemService(Context.WINDOW_SERVICE);
-    	
-    	lList.setOnScrollListener(osl);
-        
-        LayoutInflater inflate = (LayoutInflater)getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        
-        mDialogText = (TextView) inflate.inflate(R.layout.list_position, null);
-        mDialogText.setVisibility(View.INVISIBLE);
-        
-        mHandler.post(new Runnable() {
-
-            public void run() {
-                mReady = true;
-                WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
-                        LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT,
-                        WindowManager.LayoutParams.TYPE_APPLICATION,
-                        WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
-                                | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
-                        PixelFormat.TRANSLUCENT);
-                mWindowManager.addView(mDialogText, lp);
-            }
-        });
-        */
+    	lList.setOnItemClickListener(libraryClickListener);
 	}
+	
+	private OnItemClickListener libraryClickListener = new OnItemClickListener() {
+
+		@Override
+		public void onItemClick(AdapterView<?> arg0, View v, int arg2, long arg3) {
+			// TODO Auto-generated method stub
+			flipBack();
+			long oidLibrary = Long.parseLong(String.valueOf(v.getTag()));
+			TextView contentName = (TextView) rootView.findViewById(R.id.title_of_library_back); 
+			TextView nickname = (TextView) rootView.findViewById(R.id.nickname_back);
+			ImageView thumbImage = (ImageView) rootView.findViewById(R.id.image_back);
+			mp.open();
+			Cursor result = mp.fetchLibrary(oidLibrary);
+			if(result.move(0)){
+				contentName.setText(result.getString(1));
+				nickname.setText(result.getString(2));
+				String thumbUrl = result.getString(3);
+				
+				if( thumbUrl.length()>0 ) {
+					imageLoader.DisplayImage("http://lyd.kr:3000" + thumbUrl, thumbImage);
+				}
+			}
+			
+			ArrayList<HashMap<String, String>> questionList = new ArrayList<HashMap<String, String>>();
+	    	result = mp.fetchAllQuestionInLibrary(oidLibrary);
+	    	if(result.getCount()>0) {
+		    	do {
+		    		HashMap<String, String> value = new HashMap<String, String>();
+		    		value.put(MainProvider.KEY_QUESTION, result.getString(1));
+		        	questionList.add(value);
+				} while(result.moveToNext());
+		    	ListView qList = (ListView)rootView.findViewById(R.id.list_back);
+		        qList.setAdapter(new QuestionAdapter(getActivity(), questionList, "library"));
+	    	}
+	    	
+			mp.close();
+		}
+	};
 	
 	public void createMenuMarket(LayoutInflater inflater, ViewGroup container){
     	if( !isOnline() ){
@@ -384,10 +510,22 @@ public class MainFragment extends Fragment implements LoaderCallbacks<JSONObject
     	} else {
 			rootView = inflater.inflate(R.layout.view_pager, container, false);
 			
-            // Instantiate a ViewPager and a PagerAdapter.
-            mPager = (ViewPager) rootView.findViewById(R.id.pager);
-            mPagerAdapter = new MarketPagerAdapter(getFragmentManager());
-            mPager.setAdapter(mPagerAdapter);
+			int loginFlag = 0;
+			Bundle bundle = getActivity().getIntent().getExtras();
+			if(bundle!=null) {
+				loginFlag = (Integer) bundle.get(MainProvider.KEY_LOGIN_FLAG);
+			}
+			
+			if(loginFlag==1) {
+				mPager = (ViewPager) rootView.findViewById(R.id.pager);
+	            mPagerAdapter = new MarketPagerAdapter(getFragmentManager());
+	            mPager.setAdapter(mPagerAdapter);
+			}
+			else {
+				Intent i = new Intent(getActivity(), LoginActivity.class);
+		        getActivity().startActivity(i);
+		        getActivity().finish();
+			}
     	}
 	}
 	
@@ -434,14 +572,37 @@ public class MainFragment extends Fragment implements LoaderCallbacks<JSONObject
 		}
     }
 	
+	private OnTouchListener tListener = new OnTouchListener(){
+
+		@Override
+		public boolean onTouch(View arg0, MotionEvent mEvent) {
+			// TODO Auto-generated method stub
+			Log.e("x","x : " + mEvent.getX());
+			Log.e("y","y : " + mEvent.getY());
+			
+			return true;
+		}
+		
+	};
+	
 	public void createMenuSetting(LayoutInflater inflater, ViewGroup container){
 		
 		Cursor result;
 		rootView = inflater.inflate(R.layout.setting, container, false);
 
+		
+		LinearLayout layoutTimeTable = (LinearLayout) rootView.findViewById(R.id.time_table);
+   		
+   		View timeTableView = new TimeTableView(getActivity());
+   		timeTableView.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+   		layoutTimeTable.addView(timeTableView);
+   		timeTableView.setOnTouchListener(tListener);
+		
 		mp = new MainProvider(getActivity());
     	mp.open();
     	
+    	
+    	/*
     	// time table
     	TableLayout timeTable = (TableLayout)rootView.findViewById(R.id.time_table);
 		int i, j, idx=1;
@@ -473,7 +634,7 @@ public class MainFragment extends Fragment implements LoaderCallbacks<JSONObject
 				}
 			}
 		}
-		
+		*/
 		// lock screen 
 		TextView sls = (TextView)rootView.findViewById(R.id.setting_lock_screen);
     	result = mp.fetchSetting("lock_screen");
@@ -624,4 +785,51 @@ public class MainFragment extends Fragment implements LoaderCallbacks<JSONObject
 		});
 	}
 	
+	// flip
+ 	public void flipFront() {
+ 		
+        final LinearLayout visible;
+        final LinearLayout invisible;
+        invisible = fLayout;
+        visible = bLayout;
+         
+        ObjectAnimator visToInvis = ObjectAnimator.ofFloat(visible, "rotationY", 0f, 90f);
+        visToInvis.setDuration(500);
+        visToInvis.setInterpolator(accelerator);
+        final ObjectAnimator invisToVis = ObjectAnimator.ofFloat(invisible, "rotationY", -90f, 0f);
+        invisToVis.setDuration(500);
+        invisToVis.setInterpolator(decelerator);
+        visToInvis.addListener(new AnimatorListenerAdapter() {
+             @Override
+             public void onAnimationEnd(Animator anim) {
+             	visible.setVisibility(View.GONE);
+                 invisToVis.start();
+                 invisible.setVisibility(View.VISIBLE);
+             }
+        });
+        visToInvis.start();
+    }
+ 	
+ 	public void flipBack() {
+        final LinearLayout visible;
+        final LinearLayout invisible;
+		invisible = bLayout;
+		visible = fLayout;
+        
+        ObjectAnimator visToInvis = ObjectAnimator.ofFloat(visible, "rotationY", 0f, 90f);
+        visToInvis.setDuration(500);
+        visToInvis.setInterpolator(accelerator);
+        final ObjectAnimator invisToVis = ObjectAnimator.ofFloat(invisible, "rotationY", -90f, 0f);
+        invisToVis.setDuration(500);
+        invisToVis.setInterpolator(decelerator);
+        visToInvis.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator anim) {
+            	visible.setVisibility(View.GONE);
+                invisToVis.start();
+                invisible.setVisibility(View.VISIBLE);
+            }
+        });
+        visToInvis.start();
+    }
 }

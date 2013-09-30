@@ -8,7 +8,6 @@ import com.lib.mobilearn.ImageLoader;
 
 import android.app.Activity;
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,7 +22,7 @@ public class LibraryAdapter extends BaseAdapter implements Filterable{
 	private ArrayList<HashMap<String, String>> data;
 	private Filter libraryFilter;
 	private static LayoutInflater inflater=null;
-	public ImageLoader imageLoader; 
+	public ImageLoader imageLoader;
 	
 	public LibraryAdapter(Activity a, ArrayList<HashMap<String, String>> d ){
 		activity = a;
@@ -57,16 +56,21 @@ public class LibraryAdapter extends BaseAdapter implements Filterable{
 		if(convertView == null)
 			vi = inflater.inflate(R.layout.library_list_row, null);
 		TextView title = (TextView)vi.findViewById(R.id.title_of_library);
-		ImageView thumb_image=(ImageView)vi.findViewById(R.id.list_image);
+		TextView nickname = (TextView)vi.findViewById(R.id.nickname);
+		ImageView thumbImage=(ImageView)vi.findViewById(R.id.image);
 
 		HashMap<String, String> library = new HashMap<String, String>();
 		library = data.get(position);
 		
+		vi.setTag(library.get(MainProvider.KEY_OID));
 		title.setText(library.get(MainProvider.KEY_NAME));
-		imageLoader.DisplayImage(library.get(MainProvider.KEY_THUMB_URL), thumb_image);
+		nickname.setText(library.get(MainProvider.KEY_NICKNAME));
+		String thumbUrl = library.get(MainProvider.KEY_THUMB_URL);
 		
-		//vi.setBackgroundColor((position & 1) == 1 ? Color.WHITE : Color.rgb(172,172,172) );
-
+		if( !thumbUrl.equals("null") || thumbUrl.length()>0 ) {
+			imageLoader.DisplayImage("http://lyd.kr:3000" + thumbUrl, thumbImage);
+		}
+		
 		return vi;
 	}
 	

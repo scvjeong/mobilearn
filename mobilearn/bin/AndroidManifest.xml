@@ -25,8 +25,7 @@
         <activity
             android:name="com.activity.mobilearn.MainActivity"
             android:label="@string/app_name"
-			android:theme="@style/CustomActionBarTheme"
-            android:uiOptions="splitActionBarWhenNarrow" >
+			android:theme="@style/CustomActionBarTheme" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -41,7 +40,13 @@
             android:name="com.activity.mobilearn.QuestionActivity"
             android:theme="@android:style/Theme.NoTitleBar.Fullscreen" >
         </activity>
-        <activity android:name="SimpleServiceActivity"></activity>
+        <activity android:name="com.activity.mobilearn.MarketItemActivity"></activity>
+        <activity 
+            android:name="com.activity.mobilearn.LoginActivity"
+            android:theme="@android:style/Theme.NoTitleBar.Fullscreen"  >
+            
+            
+        </activity>
     	<service android:name="com.service.mobilearn.LockScreenService">
     	    <intent-filter>
                 <action android:name="com.service.mobilearn.action.Insert_Loading_Page" />

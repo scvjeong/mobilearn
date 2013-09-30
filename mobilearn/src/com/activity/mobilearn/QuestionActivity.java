@@ -62,12 +62,14 @@ public class QuestionActivity extends Activity{
 			int currentIdx = 0;
 			int idx = 0;
 			long oid;
-			while(result.moveToNext()){
-				oid = result.getLong(0);
-				ARR_OID_QUESTION.add(oid);
-				if(OidQuestion == oid)
-					currentIdx = idx;
-				idx++;
+			if(result.getCount()>0) {
+				do {
+					oid = result.getLong(0);
+					ARR_OID_QUESTION.add(oid);
+					if(OidQuestion == oid)
+						currentIdx = idx;
+					idx++;
+				} while(result.moveToNext());
 			}
 			mp.close();
 			qPager = (ViewPager) findViewById(R.id.pager);

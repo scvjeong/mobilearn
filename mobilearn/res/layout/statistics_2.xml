@@ -8,22 +8,89 @@
         android:id="@+id/layout_chart_line"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="0.3"
+        android:layout_weight="0.4"
         android:background="@color/gray"
         android:orientation="vertical" >
     </LinearLayout>
     
     <LinearLayout
+        android:id="@+id/daily_menu"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="0.1" >
+        android:layout_weight="0.1"
+        android:background="#fff" >
+
+        <TextView
+            android:id="@+id/daily_1"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.142"
+            android:gravity="center"
+            android:background="@drawable/statis_tab_selected"
+            android:textColor="@color/red"
+            android:text="일" />
+        <TextView
+            android:id="@+id/daily_2"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.142"
+            android:gravity="center"
+            android:background="@drawable/statis_tab"
+            android:textColor="#000"
+            android:text="월" />
+        <TextView
+            android:id="@+id/daily_3"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.142"
+            android:gravity="center"
+            android:background="@drawable/statis_tab"
+            android:textColor="#000"            
+            android:text="화" />
+        <TextView
+            android:id="@+id/daily_4"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.142"
+            android:gravity="center"
+            android:background="@drawable/statis_tab"
+            android:textColor="#000"            
+            android:text="수" />
+        <TextView
+            android:id="@+id/daily_5"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.142"
+            android:gravity="center"
+            android:background="@drawable/statis_tab"
+            android:textColor="#000"            
+            android:text="목" />
+        <TextView
+            android:id="@+id/daily_6"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.142"
+            android:gravity="center"
+            android:background="@drawable/statis_tab"
+            android:textColor="#000"            
+            android:text="금" />
+        <TextView
+            android:id="@+id/daily_7"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.142"
+            android:gravity="center"
+            android:background="@drawable/statis_tab"
+            android:textColor="#000"            
+            android:text="토" />
+        
     </LinearLayout>
     
     <ListView
         android:id="@+id/list"
         android:layout_width="fill_parent"
         android:layout_height="0dp"
-        android:layout_weight="0.6"
+        android:layout_weight="0.5"
         android:divider="#acacac"
         android:dividerHeight="1dp"
         android:background="#fff"

@@ -14,9 +14,49 @@
     </LinearLayout>
     
     <LinearLayout
+        android:id="@+id/state_menu"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="0.1" >
+        android:layout_weight="0.1"
+        android:background="#fff" >
+
+        <TextView
+            android:id="@+id/state_1"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.25"
+            android:gravity="center"
+            android:background="@drawable/statis_tab_selected"
+            android:textColor="@color/red"
+            android:text="초기학습" />
+        <TextView
+            android:id="@+id/state_2"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.25"
+            android:gravity="center"
+            android:background="@drawable/statis_tab"
+            android:textColor="#000"
+            android:text="감각기억" />
+        <TextView
+            android:id="@+id/state_3"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.25"
+            android:gravity="center"
+            android:background="@drawable/statis_tab"
+            android:textColor="#000"
+            android:text="단기기억" />
+        <TextView
+            android:id="@+id/state_4"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.25"
+            android:gravity="center"
+            android:background="@drawable/statis_tab"
+            android:textColor="#000"
+            android:text="장기기억" />
+        
     </LinearLayout>
     
     <ListView
@@ -24,7 +64,7 @@
         android:layout_width="fill_parent"
         android:layout_height="0dp"
         android:layout_weight="0.4"
-        android:divider="#acacac"
+        android:divider="@color/gray"
         android:dividerHeight="1dp"
         android:background="#fff"
         android:listSelector="@drawable/list_selector" />
