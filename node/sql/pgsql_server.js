@@ -1,6 +1,6 @@
 var pg_client = require('pg').Client;
 
-var conString = "postgres://mobilearn:123qwe@localhost/mobilearn";
+var conString = "postgres://mobilearn:@localhost/mobilearn";
 var client = new pg_client(conString);
 client.connect();
 
